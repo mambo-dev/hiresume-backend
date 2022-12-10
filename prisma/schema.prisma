@@ -68,8 +68,8 @@ model Experience {
   Freelancer           Freelancer? @relation(fields: [freelancer_id], references: [id])
   freelancer_id        Int?
   experience_company   String
-  experience_year_from DateTime
-  experience_year_to   DateTime
+  experience_year_from String
+  experience_year_to   String
 }
 
 model Education {
@@ -77,8 +77,8 @@ model Education {
   Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id])
   freelancer_id       Int?
   education_school    String
-  education_year_from DateTime
-  education_year_to   DateTime
+  education_year_from String
+  education_year_to   String
 }
 
 model Skill {

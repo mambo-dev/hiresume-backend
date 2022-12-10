@@ -1,3 +1,3 @@
 # hiresume-backend
 
-hi resume is a freelance platform that allows users to find freelancers and freelancers jobs
+hi resume is a freelance platform that allows users to find freelancers and freelancers to find jobs
