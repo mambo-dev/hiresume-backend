@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UsersService } from "src/users/users.service";
 import {
@@ -8,6 +12,7 @@ import {
   CreateExperienceDto,
 } from "./dto/create-bio.dto";
 import { CreateFreelancerDto } from "./dto/create-freelancer.dto";
+import { UpdateAllProfileDto, UpdateBioDto } from "./dto/update-all.dto";
 import { UpdateFreelancerDto } from "./dto/update-freelancer.dto";
 
 export type SkillData = {
@@ -77,6 +82,50 @@ export class FreelancersService {
     });
   }
 
+  async updateFullProfile(updateFullProfiledto: UpdateAllProfileDto) {
+    try {
+      const { type, freelancer_id, data, idOfEntity } = updateFullProfiledto;
+
+      const freelancer = await this.prismaService.freelancer.findUnique({
+        where: {
+          id: freelancer_id,
+        },
+      });
+
+      if (!freelancer) {
+        throw new NotFoundException("could not find profile to update");
+      }
+
+      if (`${type}` === "bio") {
+        return await this.prismaService[type].update({
+          where: {
+            freelancer_id,
+          },
+          data: data,
+        });
+      } else if (`${type}` === "education") {
+        return this.prismaService.education.update({
+          where: {
+            id: idOfEntity,
+          },
+          //@ts-ignore
+          data: data,
+        });
+      } else {
+        return this.prismaService.experience.update({
+          where: {
+            id: idOfEntity,
+          },
+          //@ts-ignore
+          data: data,
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+      throw new NotFoundException("try creating instead");
+    }
+  }
+
   async createEducation(user: any, createEducationDto: CreateEducationDto) {
     const { school, year_from, year_to } = createEducationDto;
     const freelancer = await this.confirm_freelancer_exists(user);
@@ -100,7 +149,7 @@ export class FreelancersService {
     const freelancer = await this.confirm_freelancer_exists(user);
 
     //add skills to freelancer
-    this.prismaService.freelancer.update({
+    return this.prismaService.freelancer.update({
       where: {
         id: freelancer.id,
       },
