@@ -6,6 +6,10 @@ import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { ConfigModule } from "@nestjs/config";
 import { FreelancersModule } from './freelancers/freelancers.module';
+import { ClientsModule } from './clients/clients.module';
+import { JobsModule } from './jobs/jobs.module';
+import { JobsModule } from './jobs/jobs.module';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -14,6 +18,8 @@ import { FreelancersModule } from './freelancers/freelancers.module';
     AuthModule,
     ConfigModule.forRoot({ isGlobal: true }),
     FreelancersModule,
+    ClientsModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
