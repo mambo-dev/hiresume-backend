@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  StreamableFile,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UsersService } from "src/users/users.service";
@@ -14,6 +15,9 @@ import {
 import { CreateFreelancerDto } from "./dto/create-freelancer.dto";
 import { UpdateAllProfileDto, UpdateBioDto } from "./dto/update-all.dto";
 import { UpdateFreelancerDto } from "./dto/update-freelancer.dto";
+import * as fs from "fs/promises";
+import { createReadStream } from "fs";
+import { join } from "path";
 
 export type SkillData = {
   skill_name: string;
@@ -166,7 +170,7 @@ export class FreelancersService {
   async getFullProfile(user: any) {
     const freelancer = await this.confirm_freelancer_exists(user);
 
-    return await this.prismaService.freelancer.findUnique({
+    const fullProfile = await this.prismaService.freelancer.findUnique({
       where: {
         id: freelancer.id,
       },
@@ -178,5 +182,55 @@ export class FreelancersService {
         freelancer_active_job: true,
       },
     });
+
+    return fullProfile;
+  }
+
+  async uploadFiles(user: any, files: Array<Express.Multer.File>) {
+    try {
+      const freelancer = await this.confirm_freelancer_exists(user);
+
+      console.log(files);
+
+      const fileNames: string[] = files.map((file) => {
+        return `${file.filename}`;
+      });
+
+      await this.prismaService.freelancer.update({
+        where: {
+          id: freelancer.id,
+        },
+        data: {
+          //@ts-ignore
+          freelancer_files: [...fileNames],
+        },
+      });
+
+      return true;
+    } catch (error) {
+      throw new Error("could not upload your files");
+    }
+  }
+
+  async getFreelancerFile(user: any, res: any) {
+    console.log(user);
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    const files = freelancer.freelancer_files.map(async (file) => {
+      console.log(join(process.cwd(), `/uploads/freelancer/${file}`));
+      const stream = createReadStream(
+        join(process.cwd(), `/uploads/freelancer/${file}`)
+      );
+
+      console.log(file.split(".")[1]);
+      res.set({
+        "Content-Type": `application/${file.split(".")[1]}`,
+        "Content-Disposition": `attachment; filename=${file}`,
+      });
+
+      return new StreamableFile(stream);
+    });
+
+    return files;
   }
 }

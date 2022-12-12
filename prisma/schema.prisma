@@ -52,6 +52,7 @@ model Freelancer {
   freelancer_active_job Job[]
   freelancer_user       User?        @relation(fields: [freelancer_user_id], references: [id])
   freelancer_user_id    Int?         @unique
+  freelancer_files      String[]
 }
 
 model Bio {
