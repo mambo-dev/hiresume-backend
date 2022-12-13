@@ -11,10 +11,11 @@ export class UpdateAllProfileDto {
   idOfEntity: number;
 }
 
-enum TYPE {
+export enum TYPE {
   bio,
   experience,
   education,
+  skill,
 }
 
 export class UpdateBioDto {

@@ -1,8 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
-  StreamableFile,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UsersService } from "src/users/users.service";
@@ -12,12 +12,9 @@ import {
   CreateEducationDto,
   CreateExperienceDto,
 } from "./dto/create-bio.dto";
-import { CreateFreelancerDto } from "./dto/create-freelancer.dto";
-import { UpdateAllProfileDto, UpdateBioDto } from "./dto/update-all.dto";
-import { UpdateFreelancerDto } from "./dto/update-freelancer.dto";
-import * as fs from "fs/promises";
-import { createReadStream } from "fs";
-import { join } from "path";
+import { UpdateAllProfileDto } from "./dto/update-all.dto";
+import { Response } from "express";
+import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
 
 export type SkillData = {
   skill_name: string;
@@ -212,25 +209,69 @@ export class FreelancersService {
     }
   }
 
-  async getFreelancerFile(user: any, res: any) {
-    console.log(user);
-    const freelancer = await this.confirm_freelancer_exists(user);
+  async getFreelancerFile(user: any, res: Response, filename: string) {
+    try {
+      const freelancer = await this.confirm_freelancer_exists(user);
 
-    const files = freelancer.freelancer_files.map(async (file) => {
-      console.log(join(process.cwd(), `/uploads/freelancer/${file}`));
-      const stream = createReadStream(
-        join(process.cwd(), `/uploads/freelancer/${file}`)
-      );
+      const file = freelancer.freelancer_files
+        .map((file) => {
+          if (file === filename.split(":")[1]) {
+            return file;
+          }
+          return null;
+        })
+        .filter((file) => {
+          return file === filename.split(":")[1];
+        });
 
-      console.log(file.split(".")[1]);
-      res.set({
-        "Content-Type": `application/${file.split(".")[1]}`,
-        "Content-Disposition": `attachment; filename=${file}`,
+      return res.sendFile(`${file[0]}`, { root: "uploads/freelancer" });
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException("could not find file");
+    }
+  }
+
+  async deleteFullProfile(deleteAnyProfile: DeleteAnyProfileDto) {
+    const { type, freelancer_id, idOfEntity } = deleteAnyProfile;
+    try {
+      const freelancer = await this.prismaService.freelancer.findUnique({
+        where: {
+          id: freelancer_id,
+        },
       });
 
-      return new StreamableFile(stream);
-    });
+      if (!freelancer) {
+        throw new NotFoundException("could not find profile to update");
+      }
 
-    return files;
+      if (`${type}` === "bio") {
+        return await this.prismaService[type].delete({
+          where: {
+            freelancer_id,
+          },
+        });
+      } else if (`${type}` === "education") {
+        return await this.prismaService.education.delete({
+          where: {
+            id: idOfEntity,
+          },
+        });
+      } else if (`${type}` === "skill") {
+        return await this.prismaService.skill.delete({
+          where: {
+            id: idOfEntity,
+          },
+        });
+      } else {
+        return this.prismaService.experience.delete({
+          where: {
+            id: idOfEntity,
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error.message);
+      throw new NotFoundException(`could not delete your ${type} entity`);
+    }
   }
 }

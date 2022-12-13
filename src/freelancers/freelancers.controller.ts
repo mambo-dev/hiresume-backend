@@ -9,6 +9,8 @@ import {
   Get,
 } from "@nestjs/common";
 import {
+  Delete,
+  Param,
   Res,
   UploadedFile,
   UploadedFiles,
@@ -29,6 +31,7 @@ import {
   CreateEducationDto,
   CreateExperienceDto,
 } from "./dto/create-bio.dto";
+import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
 import { UpdateAllProfileDto } from "./dto/update-all.dto";
 import { FreelancersService } from "./freelancers.service";
 
@@ -115,11 +118,18 @@ export class FreelancersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("files")
+  @Get("files:filename")
   async getFreelancerFile(
     @Request() req,
-    @Res({ passthrough: true }) res: Response
+    @Res() res: Response,
+    @Param("filename") filename
   ) {
-    return this.getFreelancerFile(req.user, res);
+    return this.freelancersService.getFreelancerFile(req.user, res, filename);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete("delete-any")
+  async deleteFullProfile(@Body() deleteAnyProfile: DeleteAnyProfileDto) {
+    return this.freelancersService.deleteFullProfile(deleteAnyProfile);
   }
 }
