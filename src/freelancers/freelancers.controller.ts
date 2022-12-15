@@ -25,6 +25,7 @@ import { Response } from "express";
 import { diskStorage } from "multer";
 import { JwtAuthGuard } from "src/auth/jwt-auth.gaurd";
 import { uuid } from "uuidv4";
+import { BidJobDto } from "./dto/bid-job.dto";
 import {
   AddSkillsDto,
   CreateBioDto,
@@ -131,5 +132,47 @@ export class FreelancersController {
   @Delete("delete-any")
   async deleteFullProfile(@Body() deleteAnyProfile: DeleteAnyProfileDto) {
     return this.freelancersService.deleteFullProfile(deleteAnyProfile);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("bid-job:job_id")
+  @UseInterceptors(
+    FilesInterceptor("files", 4, {
+      limits: { fileSize: 100000 },
+      storage: diskStorage({
+        destination: "./uploads/bids",
+        async filename(req, file, callback) {
+          callback(null, `${uuid()}-${file.originalname}`);
+        },
+      }),
+
+      fileFilter(req, file, callback) {
+        if (!Boolean(file.mimetype.match(/(pdf|doc|msword)/)))
+          callback(new Error("file type not allowed"), false);
+        callback(null, true);
+      },
+    })
+  )
+  async bidForJob(
+    @Param("job_id") job_id,
+    @Request() req,
+    @Body() bidJobDto: BidJobDto,
+    @UploadedFiles() files: Array<Express.Multer.File>
+  ) {
+    return this.freelancersService.bidForJob(
+      req.user,
+      Number(job_id.split("")[1]),
+      bidJobDto,
+      files
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete("remove-bid:bid_id")
+  async removeBid(@Param("bid_id") bid_id, @Request() req) {
+    return this.freelancersService.removeBid(
+      req.user,
+      Number(bid_id.split("")[1])
+    );
   }
 }

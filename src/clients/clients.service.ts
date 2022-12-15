@@ -1,26 +1,135 @@
-import { Injectable } from '@nestjs/common';
-import { CreateClientDto } from './dto/create-client.dto';
-import { UpdateClientDto } from './dto/update-client.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { JobsService } from "src/jobs/jobs.service";
+import { PrismaService } from "src/prisma/prisma.service";
+import { CreateJobDto } from "./dto/create-job.dto";
+import { UpdateJobDto } from "./dto/update-job.dto";
 
 @Injectable()
 export class ClientsService {
-  create(createClientDto: CreateClientDto) {
-    return 'This action adds a new client';
+  constructor(
+    private prismaService: PrismaService,
+    private jobsService: JobsService
+  ) {}
+
+  private async confirmUserExistsAndIsClient(username: string) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          user_email: username,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException("user not found");
+      }
+
+      if (user.user_role !== "client") {
+        throw new BadRequestException("cannot access this request");
+      }
+
+      return await this.prismaService.client.findUnique({
+        where: {
+          client_user_id: user.id,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+
+      throw new Error("could not complete the request at this time");
+    }
   }
 
-  findAll() {
-    return `This action returns all clients`;
+  async createJob(createJobDto: CreateJobDto, user: any) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+
+    return this.prismaService.job.create({
+      data: {
+        ...createJobDto,
+        Client: {
+          connect: {
+            id: client.id,
+          },
+        },
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} client`;
+  async updateJob(id: number, updateJobDto: UpdateJobDto, user: any) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+
+    const findJobToUpdate = await this.prismaService.job.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!findJobToUpdate) {
+      if (findJobToUpdate.clientId !== client.id) {
+        throw new ForbiddenException("cannot update this job");
+      }
+      throw new NotFoundException("did not find job you are trying to update");
+    }
+
+    return await this.prismaService.job.update({
+      where: {
+        id,
+      },
+      data: {
+        ...updateJobDto,
+      },
+    });
   }
 
-  update(id: number, updateClientDto: UpdateClientDto) {
-    return `This action updates a #${id} client`;
+  async deleteJob(id: number, user: any) {
+    await this.confirmUserExistsAndIsClient(user.username);
+
+    return await this.prismaService.job.delete({
+      where: { id },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} client`;
+  async approveBid(user: any, job_id: number, bid_id: number) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+
+    const findBid = await this.prismaService.bid.findUnique({
+      where: {
+        id: bid_id,
+      },
+    });
+
+    if (!findBid) {
+      throw new NotFoundException("could not find bid to approve");
+    }
+
+    const findJob = await this.jobsService.findJob(job_id);
+
+    if (findJob.clientId !== client.id) {
+      throw new ForbiddenException(
+        "cannot approve bids for jobs you did not create"
+      );
+    }
+
+    const approved_bid = await this.prismaService.bid.update({
+      where: {
+        id: bid_id,
+      },
+      data: {
+        bid_approval_status: true,
+      },
+    });
+
+    await this.prismaService.job.update({
+      where: {
+        id: bid_id,
+      },
+      data: {},
+    });
+
+    return findBid;
   }
 }

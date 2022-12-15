@@ -1,34 +1,47 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { ClientsService } from './clients.service';
-import { CreateClientDto } from './dto/create-client.dto';
-import { UpdateClientDto } from './dto/update-client.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Request,
+  Put,
+} from "@nestjs/common";
+import { JwtAuthGuard } from "src/auth/jwt-auth.gaurd";
+import { ClientsService } from "./clients.service";
+import { CreateJobDto } from "./dto/create-job.dto";
+import { UpdateJobDto } from "./dto/update-job.dto";
 
-@Controller('clients')
+@Controller("clients")
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
-  @Post()
-  create(@Body() createClientDto: CreateClientDto) {
-    return this.clientsService.create(createClientDto);
+  @UseGuards(JwtAuthGuard)
+  @Post("create-job")
+  createJob(@Body() createJobDto: CreateJobDto, @Request() req) {
+    return this.clientsService.createJob(createJobDto, req.user);
   }
 
-  @Get()
-  findAll() {
-    return this.clientsService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @Put("update-job:id")
+  updateJob(
+    @Body() updateJobDto: UpdateJobDto,
+    @Request() req,
+    @Param("id") id: string
+  ) {
+    return this.clientsService.updateJob(
+      Number(id.split("")[1]),
+      updateJobDto,
+      req.user
+    );
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.clientsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateClientDto: UpdateClientDto) {
-    return this.clientsService.update(+id, updateClientDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.clientsService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  @Delete("delete-job:id")
+  deleteJob(@Request() req, @Param("id") id: string) {
+    return this.clientsService.deleteJob(Number(id.split("")[1]), req.user);
   }
 }

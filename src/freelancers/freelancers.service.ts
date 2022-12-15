@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -15,6 +16,7 @@ import {
 import { UpdateAllProfileDto } from "./dto/update-all.dto";
 import { Response } from "express";
 import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
+import { BidJobDto } from "./dto/bid-job.dto";
 
 export type SkillData = {
   skill_name: string;
@@ -272,6 +274,112 @@ export class FreelancersService {
     } catch (error) {
       console.log(error.message);
       throw new NotFoundException(`could not delete your ${type} entity`);
+    }
+  }
+
+  async bidForJob(
+    user: any,
+    job_id: number,
+    bidJobDto: BidJobDto,
+    files: Array<Express.Multer.File>
+  ) {
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    //if freelancer has bid for the job he should not bid again
+    //i achive this by looking at the bid if bid has freelancer id already on the job
+
+    const bids = await this.prismaService.job
+      .findUnique({
+        where: {
+          id: job_id,
+        },
+      })
+      .job_bid();
+
+    const freelancer_already_bid = bids.some((bid) => {
+      return bid.freelancer_id === freelancer.id;
+    });
+
+    if (freelancer_already_bid) {
+      throw new BadRequestException("cannot bid twice");
+    }
+
+    if (files) {
+      const fileNames = await this.uploadBidFiles(files);
+
+      return await this.prismaService.bid.create({
+        data: {
+          ...bidJobDto,
+          bid_attachments: [...fileNames],
+          Freelancer: {
+            connect: {
+              id: freelancer.id,
+            },
+          },
+          Job: {
+            connect: {
+              id: job_id,
+            },
+          },
+          bid_approval_status: false,
+        },
+      });
+    }
+
+    return await this.prismaService.bid.create({
+      data: {
+        ...bidJobDto,
+        bid_attachments: [],
+        Freelancer: {
+          connect: {
+            id: freelancer.id,
+          },
+        },
+        Job: {
+          connect: {
+            id: job_id,
+          },
+        },
+        bid_approval_status: false,
+      },
+    });
+  }
+
+  async removeBid(user: any, bid_id: number) {
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    const findBid = await this.prismaService.bid.findUnique({
+      where: {
+        id: bid_id,
+      },
+    });
+
+    if (!findBid) {
+      throw new NotFoundException("could not find bid to delete");
+    }
+
+    if (findBid.freelancer_id !== freelancer.id) {
+      throw new ForbiddenException("cannot complete this action");
+    }
+
+    await this.prismaService.bid.delete({
+      where: {
+        id: bid_id,
+      },
+    });
+
+    return true;
+  }
+
+  private async uploadBidFiles(files: Array<Express.Multer.File>) {
+    try {
+      const fileNames: string[] = files.map((file) => {
+        return `${file.filename}`;
+      });
+
+      return fileNames;
+    } catch (error) {
+      throw new Error("could not upload your files");
     }
   }
 }
