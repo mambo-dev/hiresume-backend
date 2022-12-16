@@ -148,19 +148,35 @@ export class FreelancersService {
   }
 
   async addSkills(user: any, addSkillsDto: AddSkillsDto) {
-    const { skills } = addSkillsDto;
-    const freelancer = await this.confirm_freelancer_exists(user);
+    try {
+      const { skills } = addSkillsDto;
+      const freelancer = await this.confirm_freelancer_exists(user);
 
-    //take skill ids from client
-    //save this skills to this freelancer
+      const data = skills.map((skill) => {
+        return {
+          skill_id: skill.skill_id,
+          assignedBy: user.username,
+        };
+      });
 
-    await this.prismaService.freelancer.update({
-      where: {
-        id: freelancer.id,
-      },
-      data: {},
-    });
-    return true;
+      await this.prismaService.freelancer.update({
+        where: { id: freelancer.id },
+        data: {
+          Skill_Freelancer: {
+            createMany: {
+              data: data,
+            },
+          },
+        },
+        include: {
+          Skill_Freelancer: true,
+        },
+      });
+
+      return true;
+    } catch (error) {
+      throw new BadRequestException(`could not add skill ${error.message}`);
+    }
   }
 
   async getFullProfile(user: any) {

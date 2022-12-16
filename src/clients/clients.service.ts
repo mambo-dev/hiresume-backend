@@ -46,15 +46,31 @@ export class ClientsService {
 
   async createJob(createJobDto: CreateJobDto, user: any) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
+    const { skills_required, ...job_details } = createJobDto;
+
+    const data = skills_required.map((skill) => {
+      return {
+        skill_id: skill.skill_id,
+        assignedBy: user.username,
+      };
+    });
 
     return this.prismaService.job.create({
       data: {
-        ...createJobDto,
+        ...job_details,
         Client: {
           connect: {
             id: client.id,
           },
         },
+        Skill_Job: {
+          createMany: {
+            data: data,
+          },
+        },
+      },
+      include: {
+        Skill_Job: true,
       },
     });
   }

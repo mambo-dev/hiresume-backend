@@ -30,4 +30,10 @@ export class CreateJobDto {
   job_fixed_price: number;
 
   job_level: string;
+
+  skills_required: Skills[];
 }
+
+type Skills = {
+  skill_id: number;
+};
