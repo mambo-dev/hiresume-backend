@@ -93,7 +93,7 @@ export class ClientsService {
     });
   }
 
-  async approveBid(user: any, job_id: number, bid_id: number) {
+  async approveBid(user: any, bid_id: number) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
 
     const findBid = await this.prismaService.bid.findUnique({
@@ -106,7 +106,7 @@ export class ClientsService {
       throw new NotFoundException("could not find bid to approve");
     }
 
-    const findJob = await this.jobsService.findJob(job_id);
+    const findJob = await this.jobsService.findJob(findBid.job_id);
 
     if (findJob.clientId !== client.id) {
       throw new ForbiddenException(
@@ -127,9 +127,40 @@ export class ClientsService {
       where: {
         id: bid_id,
       },
-      data: {},
+      data: {
+        Freelancer: {
+          connect: {
+            id: approved_bid.freelancer_id,
+          },
+        },
+      },
     });
 
-    return findBid;
+    return approved_bid;
+  }
+
+  async getAllJobBids(user: any, job_id: number) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+    const findJob = await this.prismaService.job.findUnique({
+      where: {
+        id: job_id,
+      },
+    });
+
+    if (!findJob) {
+      throw new NotFoundException("could not return bids");
+    }
+
+    if (findJob.clientId !== client.id) {
+      throw new BadRequestException("could not return bids");
+    }
+
+    return await this.prismaService.job
+      .findUnique({
+        where: {
+          id: job_id,
+        },
+      })
+      .job_bid();
   }
 }

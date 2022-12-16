@@ -42,9 +42,9 @@ model Client {
 }
 
 model Freelancer {
-  id                    Int                    @id @default(autoincrement())
-  freelancer_id         String                 @unique @default(uuid())
-  freelancer_skills     Skill[]
+  id            Int    @id @default(autoincrement())
+  freelancer_id String @unique @default(uuid())
+
   freelancer_experience Experience[]
   freelancer_education  Education[]
   freelancer_Bio        Bio?
@@ -54,6 +54,7 @@ model Freelancer {
   freelancer_files      String[]
   Job_freelancer_table  Job_freelancer_table[]
   Job                   Job[]
+  Skill_Freelancer      Skill_Freelancer[]
 }
 
 model Bio {
@@ -84,16 +85,38 @@ model Education {
 }
 
 model Skill {
-  id            Int         @id @default(autoincrement())
-  Freelancer    Freelancer? @relation(fields: [freelancer_id], references: [id])
-  freelancer_id Int?
-  skill_name    String?
-  Job           Job?        @relation(fields: [job_id], references: [id])
-  job_id        Int?
+  id Int @id @default(autoincrement())
+
+  skill_name String @unique
+
+  Skill_Freelancer Skill_Freelancer[]
+  Skill_Job        Skill_Job[]
+}
+
+model Skill_Freelancer {
+  skill         Skill      @relation(fields: [skill_id], references: [id])
+  skill_id      Int // relation scalar field (used in the `@relation` attribute above)
+  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id])
+  freelancer_id Int // relation scalar field (used in the `@relation` attribute above)
+  assignedAt    DateTime   @default(now())
+  assignedBy    String
+
+  @@id([skill_id, freelancer_id])
+}
+
+model Skill_Job {
+  skill      Skill    @relation(fields: [skill_id], references: [id])
+  skill_id   Int // relation scalar field (used in the `@relation` attribute above)
+  job        Job      @relation(fields: [job_id], references: [id])
+  job_id     Int // relation scalar field (used in the `@relation` attribute above)
+  assignedAt DateTime @default(now())
+  assignedBy String
+
+  @@id([skill_id, job_id])
 }
 
 model Job {
-  id              Int     @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   job_title       String
   job_description String
   job_length      String
@@ -101,14 +124,15 @@ model Job {
   job_hourly_to   Int?
   job_fixed_price Int?
   job_level       String
-  job_skill       Skill[]
-  job_bid         Bid[]
-  Client          Client? @relation(fields: [clientId], references: [id])
-  clientId        Int?
+
+  job_bid  Bid[]
+  Client   Client? @relation(fields: [clientId], references: [id])
+  clientId Int?
 
   Job_freelancer_table Job_freelancer_table[]
   Freelancer           Freelancer?            @relation(fields: [freelancerId], references: [id])
   freelancerId         Int?
+  Skill_Job            Skill_Job[]
 }
 
 model Job_freelancer_table {

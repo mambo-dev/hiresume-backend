@@ -19,7 +19,7 @@ import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
 import { BidJobDto } from "./dto/bid-job.dto";
 
 export type SkillData = {
-  skill_name: string;
+  skill_id: number;
 };
 
 @Injectable()
@@ -151,19 +151,16 @@ export class FreelancersService {
     const { skills } = addSkillsDto;
     const freelancer = await this.confirm_freelancer_exists(user);
 
-    //add skills to freelancer
-    return this.prismaService.freelancer.update({
+    //take skill ids from client
+    //save this skills to this freelancer
+
+    await this.prismaService.freelancer.update({
       where: {
         id: freelancer.id,
       },
-      data: {
-        freelancer_skills: {
-          createMany: {
-            data: [...skills],
-          },
-        },
-      },
+      data: {},
     });
+    return true;
   }
 
   async getFullProfile(user: any) {
@@ -175,10 +172,9 @@ export class FreelancersService {
       },
       include: {
         freelancer_experience: true,
-        freelancer_skills: true,
+
         freelancer_education: true,
         freelancer_Bio: true,
-        freelancer_active_job: true,
       },
     });
 
@@ -381,5 +377,20 @@ export class FreelancersService {
     } catch (error) {
       throw new Error("could not upload your files");
     }
+  }
+
+  async getApprovedJobs(user: any) {
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    return await this.prismaService.job.findMany({
+      where: {
+        job_bid: {
+          every: {
+            bid_approval_status: true,
+          },
+        },
+        freelancerId: freelancer.id,
+      },
+    });
   }
 }

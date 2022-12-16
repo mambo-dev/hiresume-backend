@@ -175,4 +175,9 @@ export class FreelancersController {
       Number(bid_id.split("")[1])
     );
   }
+  @UseGuards(JwtAuthGuard)
+  @Get("approved-jobs")
+  async getApprovedJobs(@Request() req) {
+    return this.freelancersService.getApprovedJobs(req.user);
+  }
 }
