@@ -7,6 +7,7 @@ import {
 import { JobsService } from "src/jobs/jobs.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateJobDto } from "./dto/create-job.dto";
+import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
 
 @Injectable()
@@ -45,34 +46,39 @@ export class ClientsService {
   }
 
   async createJob(createJobDto: CreateJobDto, user: any) {
-    const client = await this.confirmUserExistsAndIsClient(user.username);
-    const { skills_required, ...job_details } = createJobDto;
+    try {
+      const client = await this.confirmUserExistsAndIsClient(user.username);
+      const { skills_required, ...job_details } = createJobDto;
 
-    const data = skills_required.map((skill) => {
-      return {
-        skill_id: skill.skill_id,
-        assignedBy: user.username,
-      };
-    });
+      const data = skills_required.map((skill) => {
+        return {
+          skill_id: skill.skill_id,
+          assignedBy: user.username,
+        };
+      });
 
-    return this.prismaService.job.create({
-      data: {
-        ...job_details,
-        Client: {
-          connect: {
-            id: client.id,
+      return await this.prismaService.job.create({
+        data: {
+          ...job_details,
+          Client: {
+            connect: {
+              id: client.id,
+            },
+          },
+          Skill_Job: {
+            createMany: {
+              data: data,
+            },
           },
         },
-        Skill_Job: {
-          createMany: {
-            data: data,
-          },
+        include: {
+          Skill_Job: true,
         },
-      },
-      include: {
-        Skill_Job: true,
-      },
-    });
+      });
+    } catch (error) {
+      console.log(error);
+      throw new Error("could not create job");
+    }
   }
 
   async updateJob(id: number, updateJobDto: UpdateJobDto, user: any) {
@@ -141,12 +147,13 @@ export class ClientsService {
 
     await this.prismaService.job.update({
       where: {
-        id: bid_id,
+        id: approved_bid.job_id,
       },
       data: {
-        Freelancer: {
-          connect: {
-            id: approved_bid.freelancer_id,
+        Job_freelancer_table: {
+          create: {
+            assignedBy: user.username,
+            freelancer_id: approved_bid.freelancer_id,
           },
         },
       },
@@ -178,5 +185,127 @@ export class ClientsService {
         },
       })
       .job_bid();
+  }
+
+  async rateAndReviewFreelancer(
+    user: any,
+    job_id: number,
+    rateReviewDto: RateReviewDto
+  ) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+    const { rating, review, freelancer_id } = rateReviewDto;
+
+    const findJob = await this.prismaService.job.findUnique({
+      where: {
+        id: job_id,
+      },
+      include: {
+        Job_freelancer_table: true,
+      },
+    });
+
+    const findFreelancer = await this.prismaService.freelancer.findUnique({
+      where: {
+        id: freelancer_id,
+      },
+    });
+
+    if (!findJob || !findFreelancer) {
+      throw new NotFoundException("could not find job or freelancer");
+    }
+
+    if (!findJob.job_completion_status) {
+      throw new ForbiddenException(
+        "cannot review or rate if job was not completed"
+      );
+    }
+
+    const freelancerWasApproved = findJob.Job_freelancer_table.some((job) => {
+      return job.freelancer_id === findFreelancer.id;
+    });
+
+    if (!freelancerWasApproved) {
+      throw new ForbiddenException(
+        "cannot review a freelancer that did not work on this job"
+      );
+    }
+
+    return await this.prismaService.ratings_Reviews.create({
+      data: {
+        rating,
+        review,
+        freelancer: {
+          connect: {
+            id: findFreelancer.id,
+          },
+        },
+        client: {
+          connect: {
+            id: client.id,
+          },
+        },
+      },
+    });
+  }
+
+  async updateRateAndReview(
+    user: any,
+    rateReviewId: number,
+    updateRateReviewDto: UpdateRateReviewDto
+  ) {
+    try {
+      const client = await this.confirmUserExistsAndIsClient(user.username);
+
+      const findRateOrReview =
+        await this.prismaService.ratings_Reviews.findUniqueOrThrow({
+          where: {
+            id: rateReviewId,
+          },
+        });
+
+      if (client.id !== findRateOrReview.client_id) {
+        throw new ForbiddenException("could not update review ");
+      }
+
+      return await this.prismaService.ratings_Reviews.update({
+        where: {
+          id: rateReviewId,
+        },
+        data: {
+          ...updateRateReviewDto,
+        },
+      });
+    } catch (error) {
+      throw new Error(`something went wrong - ${error.message}`);
+    }
+  }
+
+  async updateJobCompletionStatus(user: any, job_id: number) {
+    try {
+      const client = await this.confirmUserExistsAndIsClient(user.username);
+
+      const findJob = await this.prismaService.job.findUniqueOrThrow({
+        where: {
+          id: job_id,
+        },
+      });
+
+      if (client.id !== findJob.clientId) {
+        throw new ForbiddenException(
+          "could not update job as you are not the creator"
+        );
+      }
+
+      return await this.prismaService.job.update({
+        where: {
+          id: findJob.id,
+        },
+        data: {
+          job_completion_status: true,
+        },
+      });
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }

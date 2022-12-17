@@ -7,6 +7,7 @@ import {
   Put,
   Patch,
   Get,
+  ParseIntPipe,
 } from "@nestjs/common";
 import {
   Delete,
@@ -135,7 +136,7 @@ export class FreelancersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("bid-job:job_id")
+  @Post("bid-job/:job_id")
   @UseInterceptors(
     FilesInterceptor("files", 4, {
       limits: { fileSize: 100000 },
@@ -154,26 +155,26 @@ export class FreelancersController {
     })
   )
   async bidForJob(
-    @Param("job_id") job_id,
+    @Param("job_id", ParseIntPipe) job_id: number,
     @Request() req,
     @Body() bidJobDto: BidJobDto,
     @UploadedFiles() files: Array<Express.Multer.File>
   ) {
     return this.freelancersService.bidForJob(
       req.user,
-      Number(job_id.split("")[1]),
+      job_id,
       bidJobDto,
       files
     );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete("remove-bid:bid_id")
-  async removeBid(@Param("bid_id") bid_id, @Request() req) {
-    return this.freelancersService.removeBid(
-      req.user,
-      Number(bid_id.split("")[1])
-    );
+  @Delete("remove-bid/:bid_id")
+  async removeBid(
+    @Param("bid_id", ParseIntPipe) bid_id: number,
+    @Request() req
+  ) {
+    return this.freelancersService.removeBid(req.user, bid_id);
   }
   @UseGuards(JwtAuthGuard)
   @Get("approved-jobs")

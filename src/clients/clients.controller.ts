@@ -9,11 +9,13 @@ import {
   UseGuards,
   Request,
   Put,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "src/auth/jwt-auth.gaurd";
 import { ClientsService } from "./clients.service";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
+import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
 
 @Controller("clients")
 export class ClientsController {
@@ -26,45 +28,74 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put("update-job:id")
+  @Put("update-job/:id")
   updateJob(
     @Body() updateJobDto: UpdateJobDto,
     @Request() req,
-    @Param("id") id: string
+    @Param("id", ParseIntPipe) id: number
   ) {
-    return this.clientsService.updateJob(
-      Number(id.split("")[1]),
-      updateJobDto,
-      req.user
-    );
+    return this.clientsService.updateJob(id, updateJobDto, req.user);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete("delete-job:id")
-  deleteJob(@Request() req, @Param("id") id: string) {
-    return this.clientsService.deleteJob(Number(id.split("")[1]), req.user);
+  @Delete("delete-job/:id")
+  deleteJob(@Request() req, @Param("id", ParseIntPipe) id: number) {
+    return this.clientsService.deleteJob(id, req.user);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("approve-bid:bid_id")
+  @Post("approve-bid/:bid_id")
   approveBid(
     @Request() req,
 
-    @Param("bid_id") bid_id: string
+    @Param("bid_id", ParseIntPipe) bid_id: number
   ) {
     return this.clientsService.approveBid(
       req.user,
 
-      Number(bid_id.split("")[1])
+      bid_id
     );
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("get-bids:job_id")
-  getAllJobBids(@Request() req, @Param("job_id") job_id: string) {
-    return this.clientsService.getAllJobBids(
+  @Get("get-bids/:job_id")
+  getAllJobBids(@Request() req, @Param("job_id", ParseIntPipe) job_id: number) {
+    return this.clientsService.getAllJobBids(req.user, job_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("rate-and-review/:job_id")
+  rateAndReviewFreelancer(
+    @Request() req,
+    @Param("job_id", ParseIntPipe) job_id: number,
+    @Body() rateReviewDto: RateReviewDto
+  ) {
+    return this.clientsService.rateAndReviewFreelancer(
       req.user,
-      Number(job_id.split("")[1])
+      job_id,
+      rateReviewDto
     );
+  }
+  @UseGuards(JwtAuthGuard)
+  @Put("update-rate-review/:rateReviewId")
+  updateRateAndReview(
+    @Request() req,
+    @Param("rateReviewId", ParseIntPipe) rateReviewId: number,
+    updateRateReviewDto: UpdateRateReviewDto
+  ) {
+    return this.clientsService.updateRateAndReview(
+      req.user,
+      rateReviewId,
+      updateRateReviewDto
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("update-completion-status/:job_id")
+  updateJobCompletionStatus(
+    @Request() req,
+    @Param("job_id", ParseIntPipe) job_id: number
+  ) {
+    return this.clientsService.updateJobCompletionStatus(req.user, job_id);
   }
 }

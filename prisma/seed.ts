@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
+import * as argon2 from "argon2";
 
 const skills = [
   {
@@ -11,7 +12,7 @@ const skills = [
   {
     skill_name: "Next Js",
   },
-    {
+  {
     skill_name: "React Js",
   },
   {
@@ -77,6 +78,64 @@ const skills = [
 async function main() {
   await prisma.skill.createMany({
     data: skills,
+  });
+
+  const hash = await argon2.hash("Michael1234", {
+    hashLength: 12,
+  });
+
+  await prisma.user.create({
+    data: {
+      user_email: "michael.mambo.22@gmail.com",
+      user_country: "Kenya",
+      user_password: hash,
+      user_role: "freelancer",
+      profile: {
+        create: {
+          profile_firstname: "Michael",
+          profile_secondname: "Mambo",
+        },
+      },
+      Freelancer: {
+        create: {},
+      },
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      user_email: "mambodev@gmail.com",
+      user_country: "Kenya",
+      user_password: hash,
+      user_role: "client",
+      profile: {
+        create: {
+          profile_firstname: "Michael",
+          profile_secondname: "Mambo",
+        },
+      },
+      Client: {
+        create: {},
+      },
+    },
+  });
+
+  await prisma.user.create({
+    data: {
+      user_email: "remael99@gmail.com",
+      user_country: "Kenya",
+      user_password: hash,
+      user_role: "admin",
+      profile: {
+        create: {
+          profile_firstname: "Michael",
+          profile_secondname: "Mambo",
+        },
+      },
+      Admin: {
+        create: {},
+      },
+    },
   });
 }
 
