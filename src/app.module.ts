@@ -8,6 +8,7 @@ import { ConfigModule } from "@nestjs/config";
 import { FreelancersModule } from "./freelancers/freelancers.module";
 import { ClientsModule } from "./clients/clients.module";
 import { JobsModule } from "./jobs/jobs.module";
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { JobsModule } from "./jobs/jobs.module";
     FreelancersModule,
     ClientsModule,
     JobsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
