@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { JobsService } from "src/jobs/jobs.service";
+import { PaymentDto } from "src/payments/dto/payment.dto";
+import { PaymentsService } from "src/payments/payments.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
@@ -14,7 +16,8 @@ import { UpdateJobDto } from "./dto/update-job.dto";
 export class ClientsService {
   constructor(
     private prismaService: PrismaService,
-    private jobsService: JobsService
+    private jobsService: JobsService,
+    private paymentsService: PaymentsService
   ) {}
 
   private async confirmUserExistsAndIsClient(username: string) {
@@ -307,5 +310,13 @@ export class ClientsService {
     } catch (error) {
       throw new Error(error.message);
     }
+  }
+
+  async payHiresumeForFreelancer(
+    user: any,
+    job_id: number,
+    paymentsDto: PaymentDto
+  ) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
   }
 }

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  StreamableFile,
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UsersService } from "src/users/users.service";
@@ -17,6 +18,8 @@ import { UpdateAllProfileDto } from "./dto/update-all.dto";
 import { Response } from "express";
 import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
 import { BidJobDto } from "./dto/bid-job.dto";
+import { createReadStream } from "fs";
+import { join } from "path";
 
 export type SkillData = {
   skill_id: number;
@@ -201,8 +204,6 @@ export class FreelancersService {
     try {
       const freelancer = await this.confirm_freelancer_exists(user);
 
-      console.log(files);
-
       const fileNames: string[] = files.map((file) => {
         return `${file.filename}`;
       });
@@ -227,18 +228,20 @@ export class FreelancersService {
     try {
       const freelancer = await this.confirm_freelancer_exists(user);
 
-      const file = freelancer.freelancer_files
-        .map((file) => {
-          if (file === filename.split(":")[1]) {
-            return file;
-          }
-          return null;
-        })
-        .filter((file) => {
-          return file === filename.split(":")[1];
-        });
+      const findFile = freelancer.freelancer_files.find((file) => {
+        return file === filename;
+      });
 
-      return res.sendFile(`${file[0]}`, { root: "uploads/freelancer" });
+      const file = createReadStream(
+        join(process.cwd(), `uploads/freelancer/${findFile}`)
+      );
+
+      res.set({
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename=${findFile}`,
+      });
+
+      return new StreamableFile(file);
     } catch (error) {
       console.log(error);
       throw new BadRequestException("could not find file");

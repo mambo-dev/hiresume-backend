@@ -8,6 +8,7 @@ import {
   Patch,
   Get,
   ParseIntPipe,
+  StreamableFile,
 } from "@nestjs/common";
 import {
   Delete,
@@ -120,12 +121,12 @@ export class FreelancersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("files:filename")
+  @Get("files/:filename")
   async getFreelancerFile(
     @Request() req,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
     @Param("filename") filename
-  ) {
+  ): Promise<StreamableFile> {
     return this.freelancersService.getFreelancerFile(req.user, res, filename);
   }
 

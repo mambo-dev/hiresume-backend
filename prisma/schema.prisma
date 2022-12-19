@@ -40,6 +40,7 @@ model Client {
   client_user_id      Int?              @unique
   client_company_name String?
   client_ratings      Ratings_Reviews[]
+  client_payments     Payment[]
 }
 
 model Freelancer {
@@ -57,6 +58,7 @@ model Freelancer {
   Job                   Job[]
   Skill_Freelancer      Skill_Freelancer[]
   freelancer_ratings    Ratings_Reviews[]
+  freelancer_payment    Payment[]
 }
 
 model Ratings_Reviews {
@@ -142,6 +144,15 @@ model Job {
   Freelancer            Freelancer?            @relation(fields: [freelancerId], references: [id])
   freelancerId          Int?
   Skill_Job             Skill_Job[]
+}
+
+model Payment {
+  id                    Int         @id @default(autoincrement())
+  payment_Client        Client?     @relation(fields: [payment_client_id], references: [id])
+  payment_client_id     Int?
+  payment_amount        Int
+  payment_freelancer    Freelancer? @relation(fields: [payment_freelancer_id], references: [id])
+  payment_freelancer_id Int?
 }
 
 model Job_freelancer_table {

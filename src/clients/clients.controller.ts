@@ -16,6 +16,7 @@ import { ClientsService } from "./clients.service";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
 import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
+import { PaymentDto } from "src/payments/dto/payment.dto";
 
 @Controller("clients")
 export class ClientsController {
@@ -97,5 +98,19 @@ export class ClientsController {
     @Param("job_id", ParseIntPipe) job_id: number
   ) {
     return this.clientsService.updateJobCompletionStatus(req.user, job_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("pay-hiresume/:job_id")
+  async payHiresumeForFreelancer(
+    @Request() req,
+    @Param("job_id", ParseIntPipe) job_id: number,
+    @Body() paymentsDto: PaymentDto
+  ) {
+    return this.clientsService.payHiresumeForFreelancer(
+      req.user,
+      job_id,
+      paymentsDto
+    );
   }
 }
