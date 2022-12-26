@@ -97,7 +97,39 @@ async function main() {
         },
       },
       Freelancer: {
-        create: {},
+        create: {
+          freelancer_Bio: {
+            create: {
+              bio_description: "I am an awesome freelancer",
+              bio_title: "Full Stack react developer",
+              bio_hourly_rate: 25,
+            },
+          },
+          freelancer_education: {
+            create: {
+              education_school: "St Pauls University",
+              education_year_from: "2019",
+              education_year_to: "2021",
+            },
+          },
+          freelancer_experience: {
+            create: {
+              experience_company: "Anglican Development Services",
+              experience_year_from: "2021",
+              experience_year_to: "2024",
+            },
+          },
+          Skill_Freelancer: {
+            createMany: {
+              data: [
+                {
+                  assignedBy: "michael.mambo.22@gmail.com",
+                  skill_id: 1,
+                },
+              ],
+            },
+          },
+        },
       },
     },
   });

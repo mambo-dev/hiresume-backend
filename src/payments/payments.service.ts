@@ -3,6 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 import Stripe from "stripe";
 import { PaymentDto } from "./dto/payment.dto";
 
+//to be implemented after front end
 @Injectable()
 export class PaymentsService {
   private stripe: any;

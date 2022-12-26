@@ -32,7 +32,7 @@ export class FreelancersService {
     private prismaService: PrismaService
   ) {}
 
-  private async confirm_freelancer_exists(user: any) {
+  async confirm_freelancer_exists(user: any) {
     const findUser = await this.prismaService.user.findUnique({
       where: {
         user_email: user.username,

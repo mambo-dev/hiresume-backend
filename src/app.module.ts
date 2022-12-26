@@ -9,6 +9,9 @@ import { FreelancersModule } from "./freelancers/freelancers.module";
 import { ClientsModule } from "./clients/clients.module";
 import { JobsModule } from "./jobs/jobs.module";
 import { PaymentsModule } from './payments/payments.module';
+import { ExploresModule } from './explores/explores.module';
+import { ReportsModule } from './reports/reports.module';
+import { AdminsModule } from './admins/admins.module';
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { PaymentsModule } from './payments/payments.module';
     ClientsModule,
     JobsModule,
     PaymentsModule,
+    ExploresModule,
+    ReportsModule,
+    AdminsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

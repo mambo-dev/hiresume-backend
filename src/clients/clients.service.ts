@@ -20,7 +20,7 @@ export class ClientsService {
     private paymentsService: PaymentsService
   ) {}
 
-  private async confirmUserExistsAndIsClient(username: string) {
+  async confirmUserExistsAndIsClient(username: string) {
     try {
       const user = await this.prismaService.user.findUnique({
         where: {
@@ -312,11 +312,13 @@ export class ClientsService {
     }
   }
 
+  //TODO: payment logic once frontend is done
   async payHiresumeForFreelancer(
     user: any,
     job_id: number,
     paymentsDto: PaymentDto
   ) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
+    //pay hiresume for freelancer.
   }
 }
