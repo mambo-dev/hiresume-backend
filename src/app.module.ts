@@ -12,6 +12,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ExploresModule } from './explores/explores.module';
 import { ReportsModule } from './reports/reports.module';
 import { AdminsModule } from './admins/admins.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AdminsModule } from './admins/admins.module';
     ExploresModule,
     ReportsModule,
     AdminsModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
