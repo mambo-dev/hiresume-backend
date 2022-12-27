@@ -37,6 +37,8 @@ export class UsersService {
       throw new ConflictException("user already exists");
     }
 
+    const verificationCode = generateRandomCode("ver");
+
     const user = await this.prismaService.user.create({
       data: {
         user_email: email,
@@ -49,14 +51,17 @@ export class UsersService {
             profile_secondname: lastName,
           },
         },
+        Account: {
+          create: {
+            account_verification_code: await argon2.hash(verificationCode),
+          },
+        },
       },
     });
 
     this.assignUserRole(user.user_role, this.prismaService, user);
 
-    if (user) {
-      await this.sendVerificationCode(user);
-    }
+    await this.sendVerificationCode(email, verificationCode);
 
     const { user_password, ...returnUser } = user;
 
@@ -92,13 +97,13 @@ export class UsersService {
   }
 
   async sendVerificationCode(
-    user: User,
-    verificationCode?: number,
+    user_email: string,
+    verificationCode?: string,
     frontEndLink?: string
   ) {
     const sendEmail = await this.emailsService.sendEmail({
-      to: user.user_email,
-      from: "michael.mambo.22@gmail.com",
+      to: user_email,
+      from: "mambo.michael.22@gmail.com",
       subject: "verify your email",
       html: `<div
       class="email-div"
@@ -123,6 +128,7 @@ export class UsersService {
     </div>;`,
     });
 
+    console.log(sendEmail);
     if (!sendEmail) {
       throw new UnprocessableEntityException("could not send email");
     }
@@ -137,4 +143,8 @@ export class UsersService {
       })
       .profile();
   }
+}
+
+export function generateRandomCode(resetOrVerify: string) {
+  return `${resetOrVerify}-${Math.floor(Math.random() * 100000)}`;
 }

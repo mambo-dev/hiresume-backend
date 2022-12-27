@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import * as argon2 from "argon2";
+import { generateRandomCode } from "src/users/users.service";
 
 const skills = [
   {
@@ -86,7 +87,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      user_email: "michael.mambo.22@gmail.com",
+      user_email: "mambo.michael.22@gmail.com",
       user_country: "Kenya",
       user_password: hash,
       user_role: "freelancer",
@@ -129,6 +130,12 @@ async function main() {
               ],
             },
           },
+        },
+      },
+      Account: {
+        create: {
+          account_password_reset: generateRandomCode("ver"),
+          account_verification_code: generateRandomCode("res"),
         },
       },
     },
