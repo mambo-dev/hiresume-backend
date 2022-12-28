@@ -63,7 +63,7 @@ export class UsersService {
       },
     });
 
-    this.assignUserRole(user.user_role, this.prismaService, user);
+    await this.assignUserRole(user.user_role, this.prismaService, user);
 
     await this.sendVerificationCode(
       email,
@@ -136,7 +136,6 @@ export class UsersService {
     </div>;`,
     });
 
-    console.log(sendEmail);
     if (!sendEmail) {
       throw new UnprocessableEntityException("could not send email");
     }

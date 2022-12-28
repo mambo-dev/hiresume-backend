@@ -8,11 +8,11 @@ import { ConfigModule } from "@nestjs/config";
 import { FreelancersModule } from "./freelancers/freelancers.module";
 import { ClientsModule } from "./clients/clients.module";
 import { JobsModule } from "./jobs/jobs.module";
-import { PaymentsModule } from './payments/payments.module';
-import { ExploresModule } from './explores/explores.module';
-import { ReportsModule } from './reports/reports.module';
-import { AdminsModule } from './admins/admins.module';
-import { EmailModule } from './email/email.module';
+import { PaymentsModule } from "./payments/payments.module";
+import { ExploresModule } from "./explores/explores.module";
+import { ReportsModule } from "./reports/reports.module";
+import { AdminsModule } from "./admins/admins.module";
+import { EmailModule } from "./email/email.module";
 
 @Module({
   imports: [
@@ -31,5 +31,6 @@ import { EmailModule } from './email/email.module';
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [AppModule],
 })
 export class AppModule {}
