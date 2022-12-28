@@ -61,7 +61,11 @@ export class UsersService {
 
     this.assignUserRole(user.user_role, this.prismaService, user);
 
-    await this.sendVerificationCode(email, verificationCode);
+    await this.sendVerificationCode(
+      email,
+      verificationCode,
+      "http://localhost:3000"
+    );
 
     const { user_password, ...returnUser } = user;
 
@@ -107,7 +111,7 @@ export class UsersService {
       subject: "verify your email",
       html: `<div
       class="email-div"
-      style="width: 50%;height: 50%;display: flex;flex-direction: column;align-items: flex-start;justify-content: flex-start;background-color: white;border: 1px solid rgb(151, 151, 151);border-radius: 5px;padding: 5px;box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-webkit-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-moz-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);margin: auto;"
+      style="width: 80%;height: 60%;display: flex;flex-direction: column;align-items: flex-start;justify-content: flex-start;background-color: white;border: 1px solid rgb(151, 151, 151);border-radius: 5px;padding: 5px;box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-webkit-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-moz-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);margin: auto;"
     >
       <h1 style="color: rgb(115, 115, 115);">Welcome to Hiresume</h1>
       <p style="color: rgb(115, 115, 115);">
@@ -119,7 +123,7 @@ export class UsersService {
         class="button-div"
         style="width: 100%;display: flex;flex-direction: column;align-items: center;justify-content: center;"
       >
-        <a href="/${frontEndLink}">
+        <a href="${frontEndLink}">
           <button style="background-color: rgb(114, 255, 255);border: 1px solid teal;border-radius: 5px;width: 100px;height: 30px;padding: 5px;color: rgb(0, 79, 79);font-weight: bolder;margin: auto;">
             verify
           </button>

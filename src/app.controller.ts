@@ -35,4 +35,9 @@ export class AppController {
   getProfile(@Request() req) {
     return this.userService.findProfile(req.user.username);
   }
+
+  @Get("oauth-success")
+  oauthSuccess() {
+    return true;
+  }
 }

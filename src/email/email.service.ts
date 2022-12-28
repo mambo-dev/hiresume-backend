@@ -1,7 +1,21 @@
 import { Injectable } from "@nestjs/common";
-import * as sendGrid from "@sendgrid/mail";
+import * as nodemailer from "nodemailer";
 
-sendGrid.setApiKey(process.env.SENDGRID_API_KEY);
+const transport = nodemailer.createTransport({
+  //@ts-ignore
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    type: "OAuth2",
+    user: "mambo.michael.22@gmail.com",
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    refreshToken: process.env.REFRESH_TOKEN,
+    accessToken: process.env.ACCESS_TOKEN,
+  },
+});
+
 type SendEmailMsg = {
   to: string;
   from: string;
@@ -14,7 +28,7 @@ type SendEmailMsg = {
 export class EmailService {
   async sendEmail(message: SendEmailMsg) {
     try {
-      await sendGrid.send(message);
+      await transport.sendMail(message);
 
       return true;
     } catch (error) {
