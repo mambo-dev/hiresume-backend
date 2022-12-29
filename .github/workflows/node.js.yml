@@ -41,5 +41,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npx prisma migrate dev --name "hosted_init"
+    - run: npx prisma migrate deploy 
     - run: npm run test:e2e
