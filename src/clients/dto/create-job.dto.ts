@@ -27,7 +27,7 @@ export class CreateJobDto {
 
   job_hourly_to: number;
 
-  job_fixed_price: number;
+  job_fixed_price?: number;
 
   job_level: string;
 

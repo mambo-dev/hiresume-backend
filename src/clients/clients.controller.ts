@@ -65,15 +65,17 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("rate-and-review/:job_id")
+  @Post("rate-and-review/:job_id/:freelancer_id")
   rateAndReviewFreelancer(
     @Request() req,
     @Param("job_id", ParseIntPipe) job_id: number,
+    @Param("freelancer_id", ParseIntPipe) freelancer_id: number,
     @Body() rateReviewDto: RateReviewDto
   ) {
     return this.clientsService.rateAndReviewFreelancer(
       req.user,
       job_id,
+      freelancer_id,
       rateReviewDto
     );
   }

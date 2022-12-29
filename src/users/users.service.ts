@@ -20,7 +20,7 @@ export class UsersService {
     private emailsService: EmailService
   ) {}
   async findOne(username: string) {
-    return this.prismaService.user.findUnique({
+    return await this.prismaService.user.findUnique({
       where: {
         user_email: username,
       },
@@ -115,7 +115,7 @@ export class UsersService {
       subject: "verify your email",
       html: `<div
       class="email-div"
-      style="width: 80%;height: 60%;display: flex;flex-direction: column;align-items: flex-start;justify-content: flex-start;background-color: white;border: 1px solid rgb(151, 151, 151);border-radius: 5px;padding: 5px;box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-webkit-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-moz-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);margin: auto;"
+      style="width: 80%;height: 60%;display: flex;flex-direction:column;align-items: flex-start;justify-content: flex-start;background-color: white;border: 1px solid rgb(151, 151, 151);border-radius: 5px;padding: 5px;box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-webkit-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);-moz-box-shadow: 6px 4px 13px -3px rgba(240,235,235,0.75);margin: auto;"
     >
       <h1 style="color: rgb(115, 115, 115);">Welcome to Hiresume</h1>
       <p style="color: rgb(115, 115, 115);">

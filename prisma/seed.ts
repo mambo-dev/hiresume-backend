@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import * as argon2 from "argon2";
-import { generateRandomCode } from "src/users/users.service";
+
+function generateRandomCode(resetOrVerify: string) {
+  return `${resetOrVerify}-${Math.floor(Math.random() * 100000)}`;
+}
 
 const skills = [
   {

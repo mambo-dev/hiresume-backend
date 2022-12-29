@@ -91,10 +91,13 @@ export class ClientsService {
       where: {
         id,
       },
+      include: {
+        Client: true,
+      },
     });
 
     if (!findJobToUpdate) {
-      if (findJobToUpdate.clientId !== client.id) {
+      if (findJobToUpdate.Client.id !== client.id) {
         throw new ForbiddenException("cannot update this job");
       }
       throw new NotFoundException("did not find job you are trying to update");
@@ -193,10 +196,11 @@ export class ClientsService {
   async rateAndReviewFreelancer(
     user: any,
     job_id: number,
+    freelancer_id: number,
     rateReviewDto: RateReviewDto
   ) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
-    const { rating, review, freelancer_id } = rateReviewDto;
+    const { rating, review } = rateReviewDto;
 
     const findJob = await this.prismaService.job.findUnique({
       where: {

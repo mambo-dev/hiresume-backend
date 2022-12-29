@@ -300,18 +300,20 @@ export class FreelancersService {
   ) {
     const freelancer = await this.confirm_freelancer_exists(user);
 
-    //if freelancer has bid for the job he should not bid again
-    //i achive this by looking at the bid if bid has freelancer id already on the job
+    const bids = await this.prismaService.job.findUnique({
+      where: {
+        id: job_id,
+      },
+      include: {
+        job_bid: true,
+      },
+    });
 
-    const bids = await this.prismaService.job
-      .findUnique({
-        where: {
-          id: job_id,
-        },
-      })
-      .job_bid();
+    if (!bids) {
+      throw new BadRequestException("no job to bid");
+    }
 
-    const freelancer_already_bid = bids.some((bid) => {
+    const freelancer_already_bid = bids.job_bid.some((bid) => {
       return bid.freelancer_id === freelancer.id;
     });
 

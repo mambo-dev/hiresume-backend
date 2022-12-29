@@ -18,7 +18,7 @@ model User {
   user_password   String
   user_role       String
   user_country    String
-  profile         Profile?    @relation(fields: [user_profile_id], references: [id])
+  profile         Profile?    @relation(fields: [user_profile_id], references: [id], onDelete: Cascade)
   user_profile_id Int?        @unique
   Freelancer      Freelancer?
   Admin           Admin?
@@ -28,7 +28,7 @@ model User {
 
 model Account {
   id                        Int     @id @default(autoincrement())
-  account_user              User?   @relation(fields: [account_user_id], references: [id])
+  account_user              User?   @relation(fields: [account_user_id], references: [id], onDelete: Cascade)
   account_user_id           Int     @unique
   account_password_reset    String?
   account_verification_code String?
@@ -48,7 +48,7 @@ model Client {
   id                  Int               @id @default(autoincrement())
   client_id           String            @unique @default(uuid())
   client_job          Job[]
-  client_user         User?             @relation(fields: [client_user_id], references: [id])
+  client_user         User?             @relation(fields: [client_user_id], references: [id], onDelete: Cascade)
   client_user_id      Int?              @unique
   client_company_name String?
   client_ratings      Ratings_Reviews[]
@@ -63,7 +63,7 @@ model Freelancer {
   freelancer_education  Education[]
   freelancer_Bio        Bio?
   freelancer_Bid        Bid[]
-  freelancer_user       User?                  @relation(fields: [freelancer_user_id], references: [id])
+  freelancer_user       User?                  @relation(fields: [freelancer_user_id], references: [id], onDelete: Cascade)
   freelancer_user_id    Int?                   @unique
   freelancer_files      String[]
   Job_freelancer_table  Job_freelancer_table[]
@@ -77,15 +77,15 @@ model Ratings_Reviews {
   id            Int        @id @default(autoincrement())
   rating        Int
   review        String
-  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id])
+  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id Int
-  client        Client     @relation(fields: [client_id], references: [id])
+  client        Client     @relation(fields: [client_id], references: [id], onDelete: Cascade)
   client_id     Int
 }
 
 model Bio {
   id              Int         @id @default(autoincrement())
-  Freelancer      Freelancer? @relation(fields: [freelancer_id], references: [id])
+  Freelancer      Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id   Int?        @unique
   bio_title       String
   bio_description String
@@ -94,7 +94,7 @@ model Bio {
 
 model Experience {
   id                   Int         @id @default(autoincrement())
-  Freelancer           Freelancer? @relation(fields: [freelancer_id], references: [id])
+  Freelancer           Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id        Int?
   experience_company   String
   experience_year_from String
@@ -103,7 +103,7 @@ model Experience {
 
 model Education {
   id                  Int         @id @default(autoincrement())
-  Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id])
+  Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id       Int?
   education_school    String
   education_year_from String
@@ -118,9 +118,9 @@ model Skill {
 }
 
 model Skill_Freelancer {
-  skill         Skill      @relation(fields: [skill_id], references: [id])
+  skill         Skill      @relation(fields: [skill_id], references: [id], onDelete: Cascade)
   skill_id      Int // relation scalar field (used in the `@relation` attribute above)
-  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id])
+  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id Int // relation scalar field (used in the `@relation` attribute above)
   assignedAt    DateTime   @default(now())
   assignedBy    String
@@ -129,9 +129,9 @@ model Skill_Freelancer {
 }
 
 model Skill_Job {
-  skill      Skill    @relation(fields: [skill_id], references: [id])
+  skill      Skill    @relation(fields: [skill_id], references: [id], onDelete: Cascade)
   skill_id   Int // relation scalar field (used in the `@relation` attribute above)
-  job        Job      @relation(fields: [job_id], references: [id])
+  job        Job      @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id     Int // relation scalar field (used in the `@relation` attribute above)
   assignedAt DateTime @default(now())
   assignedBy String
@@ -150,27 +150,27 @@ model Job {
   job_level             String
   job_completion_status Boolean                @default(false)
   job_bid               Bid[]
-  Client                Client?                @relation(fields: [clientId], references: [id])
+  Client                Client?                @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId              Int?
   Job_freelancer_table  Job_freelancer_table[]
-  Freelancer            Freelancer?            @relation(fields: [freelancerId], references: [id])
+  Freelancer            Freelancer?            @relation(fields: [freelancerId], references: [id], onDelete: Cascade)
   freelancerId          Int?
   Skill_Job             Skill_Job[]
 }
 
 model Payment {
   id                    Int         @id @default(autoincrement())
-  payment_Client        Client?     @relation(fields: [payment_client_id], references: [id])
+  payment_Client        Client?     @relation(fields: [payment_client_id], references: [id], onDelete: Cascade)
   payment_client_id     Int?
   payment_amount        Int
-  payment_freelancer    Freelancer? @relation(fields: [payment_freelancer_id], references: [id])
+  payment_freelancer    Freelancer? @relation(fields: [payment_freelancer_id], references: [id], onDelete: Cascade)
   payment_freelancer_id Int?
 }
 
 model Job_freelancer_table {
-  job           Job        @relation(fields: [job_id], references: [id])
+  job           Job        @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id        Int // relation scalar field (used in the `@relation` attribute above)
-  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id])
+  freelancer    Freelancer @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id Int // relation scalar field (used in the `@relation` attribute above)
   assignedAt    DateTime   @default(now())
   assignedBy    String
@@ -183,9 +183,9 @@ model Bid {
   bid_rate            Int
   bid_coverletter     String
   bid_attachments     String[]
-  Job                 Job?        @relation(fields: [job_id], references: [id])
+  Job                 Job?        @relation(fields: [job_id], references: [id], onDelete: Cascade)
   job_id              Int?
-  Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id])
+  Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id       Int?
   bid_approval_status Boolean
 }
@@ -193,6 +193,6 @@ model Bid {
 model Admin {
   id            Int    @id @default(autoincrement())
   admin_id      String @unique @default(uuid())
-  admin_user    User?  @relation(fields: [admin_user_id], references: [id])
+  admin_user    User?  @relation(fields: [admin_user_id], references: [id], onDelete: Cascade)
   admin_user_id Int?   @unique
 }

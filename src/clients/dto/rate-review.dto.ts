@@ -13,10 +13,6 @@ export class RateReviewDto {
     message: "review should not be more than 100 words",
   })
   review: string;
-  @IsNotEmpty({
-    message: "freelancer_id is required",
-  })
-  freelancer_id: number;
 }
 
 export class UpdateRateReviewDto extends PartialType(RateReviewDto) {}

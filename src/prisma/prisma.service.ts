@@ -11,10 +11,16 @@ export class PrismaService extends PrismaClient {
     });
   }
 
-  async cleanDb() {
-    return this.$executeRaw`DROP SCHEMA public CASCADE`;
+  async cleanDb(array: string[]) {
+    const prisma = new PrismaClient();
+    const deleteMany = array.map(async (arr) => {
+      await prisma[arr].deleteMany({});
+    });
+    // await this.user.deleteMany({});
+
+    return Promise.all(deleteMany);
   }
   async restoreDb() {
-    return this.$executeRaw`CREATE SCHEMA public`;
+    return this.$executeRaw`CREATE SCHEMA test_db`;
   }
 }
