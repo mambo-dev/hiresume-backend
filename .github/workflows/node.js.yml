@@ -8,6 +8,20 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+env:
+
+  DATABASE_URL: postgresql://postgres:Remael123@localhost:5432/mydb?schema=my_db
+  JWT_SECRET: eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY3MTgyNjIxMywiaWF0IjoxNjcxODI2MjEzfQ.j234-zsUn6Wgx1f6QCg-gr_8H-lhs-iW50IcWPVcjy0
+  STRIPE_SECRET_KEY: sk_test_51Is35VGwGcmgx7Pv4DL6SHeOZcTarFf4Tt9hrfnPZ2ttzoYMwQBPezefVurIFHsxXzZMJ8GCK8xJVHIOTihGjknQ00PeSnEhV8
+  SENDGRID_API_KEY: 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
+  GOOGLE_CLIENT_ID: 72671390432-0p70oarruue88b5bb66hsgd9b082bu8v.apps.googleusercontent.com
+  GOOGLE_CLIENT_SECRET: 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
+  GOOGLE_REDIRECT_URI: http://localhost:3000/oauth-success
+  APP_USER_EMAIL: mambo.michael.22@gmail.com
+  GOOGLE_OAUTH_CODE: 4/0AWgavdfHbZ-6rj2CQx3xOk7c7IFusBDJQe7wjk0ZEhy2w3vacFoPSRvW941GAb7dFYT3gA
+  REFRESH_TOKEN: 1//04gzxjLZ3VH4dCgYIARAAGAQSNwF-L9IrBTAUY48Q3B-2_Hw78Hy-nPqavXOgRCn3Y9mG9iFULcjM6MrTj5PvuOw2XipSkGA5_tw
+  ACCESS_TOKEN: ya29.a0AX9GBdWKEVwomvr9A64Xt0vgnFlpNFvc076tMP8tBSV091UCRF3Xgc_zUBJV3545hL6WT3E4jWzsSdizAMTjSm-QdkBpT6laqTvApx3offyhOYSbiEa3wMGBZHhHKOnPR9kgHrvnM20pL9kPlLc076QAdJ7aaCgYKAfgSARASFQHUCsbCCjGVxtnLX2Sf6DPlHJrhpA0163
+ 
 
 jobs:
   build:
