@@ -140,8 +140,8 @@ describe("app-e2e", () => {
     });
 
     describe("account restore", () => {
-      jest.setTimeout(10000);
-      pactum.request.setDefaultTimeout(10000);
+      jest.setTimeout(20000);
+      pactum.request.setDefaultTimeout(20000);
       it("should intiate password recovery by sending email", () => {
         return pactum
           .spec()
