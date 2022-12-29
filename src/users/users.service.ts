@@ -73,7 +73,10 @@ export class UsersService {
 
     const { user_password, ...returnUser } = user;
 
-    return returnUser;
+    return {
+      ...returnUser,
+      verificationCode,
+    };
   }
 
   async assignUserRole(role: string, prisma: any, user: any) {
@@ -297,3 +300,5 @@ export class UsersService {
 export function generateRandomCode(resetOrVerify: string) {
   return `${resetOrVerify}-${Math.floor(Math.random() * 100000)}`;
 }
+
+export let testVerification: string;

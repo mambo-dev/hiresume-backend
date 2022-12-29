@@ -88,10 +88,14 @@ export class FreelancersService {
     });
   }
 
-  async updateFullProfile(updateFullProfiledto: UpdateAllProfileDto) {
+  async updateFullProfile(
+    updateFullProfiledto: UpdateAllProfileDto,
+    freelancer_id: number,
+    idOfEntity: number
+  ) {
     try {
-      const { type, freelancer_id, data, idOfEntity } = updateFullProfiledto;
-
+      const { type, data } = updateFullProfiledto;
+      console.log(type);
       const freelancer = await this.prismaService.freelancer.findUnique({
         where: {
           id: freelancer_id,

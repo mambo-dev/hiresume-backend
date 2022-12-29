@@ -21,31 +21,25 @@ export class ClientsService {
   ) {}
 
   async confirmUserExistsAndIsClient(username: string) {
-    try {
-      const user = await this.prismaService.user.findUnique({
-        where: {
-          user_email: username,
-        },
-      });
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        user_email: username,
+      },
+    });
 
-      if (!user) {
-        throw new NotFoundException("user not found");
-      }
-
-      if (user.user_role !== "client") {
-        throw new BadRequestException("cannot access this request");
-      }
-
-      return await this.prismaService.client.findUnique({
-        where: {
-          client_user_id: user.id,
-        },
-      });
-    } catch (error) {
-      console.log(error);
-
-      throw new Error("could not complete the request at this time");
+    if (!user) {
+      throw new NotFoundException("user not found");
     }
+
+    if (user.user_role !== "client") {
+      throw new BadRequestException("cannot access this request");
+    }
+
+    return await this.prismaService.client.findUnique({
+      where: {
+        client_user_id: user.id,
+      },
+    });
   }
 
   async createJob(createJobDto: CreateJobDto, user: any) {

@@ -16,7 +16,10 @@ import {
   CreateEducationDto,
   CreateExperienceDto,
 } from "../src/freelancers/dto/create-bio.dto";
-import { UpdateAllProfileDto } from "../src/freelancers/dto/update-all.dto";
+import {
+  TYPE,
+  UpdateAllProfileDto,
+} from "../src/freelancers/dto/update-all.dto";
 
 describe("app-e2e", () => {
   let app: INestApplication;
@@ -59,7 +62,8 @@ describe("app-e2e", () => {
           .spec()
           .post("/auth/signup")
           .withBody(createUserdto)
-          .expectStatus(201);
+          .expectStatus(201)
+          .stores("user_ver_code", "verificationCode");
       });
 
       it("should throw if user exists", async () => {
@@ -102,6 +106,48 @@ describe("app-e2e", () => {
             password: "Michael1235",
           })
           .expectStatus(401);
+      });
+
+      it("should not verify user account and  throw forbidden exception", () => {
+        return pactum
+          .spec()
+          .post("/verify/ver-21321")
+          .withHeaders({
+            Authorization: "Bearer $S{user_access_tk}",
+          })
+          .expectStatus(403);
+      });
+
+      it("should verify user account", () => {
+        return pactum
+          .spec()
+          .post("/verify/$S{user_ver_code}")
+          .withHeaders({
+            Authorization: "Bearer $S{user_access_tk}",
+          })
+          .expectStatus(201);
+      });
+
+      it("should not verify user account", () => {
+        return pactum
+          .spec()
+          .post("/verify/$S{user_ver_code}")
+          .withHeaders({
+            Authorization: "Bearer $S{user_access_tk}",
+          })
+          .expectStatus(400);
+      });
+    });
+
+    describe("account restore", () => {
+      jest.setTimeout(10000);
+      pactum.request.setDefaultTimeout(10000);
+      it("should intiate password recovery by sending email", () => {
+        return pactum
+          .spec()
+          .post("/forgot-password")
+          .withBody({ email: createUserdto.email })
+          .expectStatus(201);
       });
     });
   });
@@ -457,7 +503,8 @@ describe("app-e2e", () => {
             Authorization: "Bearer $S{freelancer_access_tk}",
           })
           .withBody(bioDto)
-          .expectStatus(201);
+          .expectStatus(201)
+          .stores("id_of_entity", "id");
       });
       it("should fail to create freelancers bio", () => {
         return pactum
@@ -531,6 +578,77 @@ describe("app-e2e", () => {
           .withBody(addSkillsDto)
           .expectStatus(201);
       });
+      const updateAllProfile: UpdateAllProfileDto = {
+        //@ts-ignore
+        type: "bio",
+        //@ts-ignore
+        data: {
+          bio_title: "React Graphql Full stack  developer",
+        },
+      };
+      it("should update any part of a freelancers profile", () => {
+        return pactum
+          .spec()
+          .patch("/freelancers/update-any/$S{freelancer_id}/$S{id_of_entity}")
+          .withHeaders({
+            Authorization: "Bearer $S{freelancer_access_tk}",
+          })
+          .withBody(updateAllProfile)
+          .expectStatus(200);
+      });
+      it("should not update any part of a freelancers profile", () => {
+        return pactum
+          .spec()
+          .patch(
+            "/freelancers/update-any/$S{freelancer_id+=1}/$S{id_of_entity}"
+          )
+          .withHeaders({
+            Authorization: "Bearer $S{freelancer_access_tk}",
+          })
+          .withBody(updateAllProfile)
+          .expectStatus(404);
+      });
+    });
+  });
+
+  describe("Report", () => {
+    it("should get Freelancer reports", () => {
+      return pactum
+        .spec()
+        .get("/reports/freelancer-reports")
+        .withHeaders({
+          Authorization: "Bearer $S{freelancer_access_tk}",
+        })
+        .expectStatus(200);
+    });
+    it("should not get Freelancer reports", () => {
+      return pactum
+        .spec()
+        .get("/reports/freelancer-reports")
+        .withHeaders({
+          Authorization: "Bearer $S{user_access_tk}",
+        })
+        .expectStatus(409);
+    });
+
+    it("should get client reports", () => {
+      return pactum
+        .spec()
+        .get("/reports/client-reports")
+        .withHeaders({
+          Authorization: "Bearer $S{user_access_tk}",
+        })
+        .expectStatus(200);
+    });
+
+    it("should throw and fail to get client reports", () => {
+      return pactum
+        .spec()
+        .get("/reports/client-reports")
+        .withHeaders({
+          Authorization: "Bearer $S{freelancer_access_tk}",
+        })
+        .expectStatus(400);
     });
   });
 });

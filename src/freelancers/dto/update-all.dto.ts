@@ -2,13 +2,9 @@ import { IsNotEmpty, MaxLength, MinLength } from "class-validator";
 
 export class UpdateAllProfileDto {
   @IsNotEmpty()
-  freelancer_id: number;
-  @IsNotEmpty()
   data: UpdateBioDto | UpdateEducationDto | UpdateExperienceDto;
   @IsNotEmpty()
   type: TYPE;
-  @IsNotEmpty()
-  idOfEntity: number;
 }
 
 export enum TYPE {

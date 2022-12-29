@@ -86,12 +86,18 @@ export class FreelancersController {
 
   //updates any feature of a freelancers profile
   @UseGuards(JwtAuthGuard)
-  @Patch("update-any")
+  @Patch("update-any/:freelancer_id/:idOfEntity")
   async updateFullProfile(
     @Request() req,
-    @Body() updateFullProfiledto: UpdateAllProfileDto
+    @Body() updateFullProfiledto: UpdateAllProfileDto,
+    @Param("freelancer_id", ParseIntPipe) freelancer_id: number,
+    @Param("idOfEntity", ParseIntPipe) idOfEntity: number
   ) {
-    return this.freelancersService.updateFullProfile(updateFullProfiledto);
+    return this.freelancersService.updateFullProfile(
+      updateFullProfiledto,
+      freelancer_id,
+      idOfEntity
+    );
   }
 
   @UseGuards(JwtAuthGuard)
