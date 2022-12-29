@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 env:
 
-  DATABASE_URL: postgresql://postgres:Remael123@localhost:5432/mydb?schema=my_db
+  DATABASE_URL: postgres://lavspwzl:VW1hNGYMmD8PStJ-KyFCB3uE78ky6eqR@mel.db.elephantsql.com/lavspwzl
   JWT_SECRET: eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY3MTgyNjIxMywiaWF0IjoxNjcxODI2MjEzfQ.j234-zsUn6Wgx1f6QCg-gr_8H-lhs-iW50IcWPVcjy0
   STRIPE_SECRET_KEY: sk_test_51Is35VGwGcmgx7Pv4DL6SHeOZcTarFf4Tt9hrfnPZ2ttzoYMwQBPezefVurIFHsxXzZMJ8GCK8xJVHIOTihGjknQ00PeSnEhV8
   SENDGRID_API_KEY: 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
