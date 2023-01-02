@@ -62,8 +62,9 @@ export class FreelancersService {
 
     return await this.prismaService.bio.create({
       data: {
+        bio_image_url: image.filename,
         bio_title: title,
-        bio_hourly_rate: hourly_rate,
+        bio_hourly_rate: Number(hourly_rate),
         bio_description: description,
         Freelancer: {
           connect: {
@@ -99,7 +100,6 @@ export class FreelancersService {
   ) {
     try {
       const { type, data } = updateFullProfiledto;
-      console.log(type);
       const freelancer = await this.prismaService.freelancer.findUnique({
         where: {
           id: freelancer_id,
@@ -205,7 +205,19 @@ export class FreelancersService {
       },
     });
 
-    return fullProfile;
+    const file = createReadStream(
+      join(
+        process.cwd(),
+        `uploads/freelancer/${fullProfile.freelancer_Bio.bio_image_url}`
+      )
+    );
+
+    return {
+      ...fullProfile,
+      freelancer_Bio: {
+        ...fullProfile.freelancer_Bio,
+      },
+    };
   }
 
   async uploadFiles(user: any, files: Array<Express.Multer.File>) {

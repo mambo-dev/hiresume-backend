@@ -104,6 +104,7 @@ async function main() {
         create: {
           freelancer_Bio: {
             create: {
+              bio_image_url: "just random",
               bio_description: "I am an awesome freelancer",
               bio_title: "Full Stack react developer",
               bio_hourly_rate: 25,
