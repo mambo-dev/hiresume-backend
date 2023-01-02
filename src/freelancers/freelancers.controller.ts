@@ -50,8 +50,29 @@ export class FreelancersController {
 
   @UseGuards(JwtAuthGuard)
   @Post("bio")
-  async createBio(@Request() req, @Body() createBioDto: CreateBioDto) {
-    return this.freelancersService.createBio(req.user, createBioDto);
+  @UseInterceptors(
+    FileInterceptor("image", {
+      limits: { fileSize: 100000 },
+      storage: diskStorage({
+        destination: "./uploads/images",
+        async filename(req, file, callback) {
+          callback(null, `${uuid()}-${file.originalname}`);
+        },
+      }),
+
+      fileFilter(req, file, callback) {
+        if (!Boolean(file.mimetype.match(/(jpeg|png|jpg|svg)/)))
+          callback(new Error("file type not allowed"), false);
+        callback(null, true);
+      },
+    })
+  )
+  async createBio(
+    @Request() req,
+    @Body() createBioDto: CreateBioDto,
+    @UploadedFile() image: Express.Multer.File
+  ) {
+    return this.freelancersService.createBio(req.user, createBioDto, image);
   }
 
   @UseGuards(JwtAuthGuard)

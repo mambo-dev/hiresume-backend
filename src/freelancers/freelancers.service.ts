@@ -52,7 +52,11 @@ export class FreelancersService {
     return freelancer;
   }
 
-  async createBio(user: any, createBioDto: CreateBioDto) {
+  async createBio(
+    user: any,
+    createBioDto: CreateBioDto,
+    image: Express.Multer.File
+  ) {
     const { title, description, hourly_rate } = createBioDto;
     const freelancer = await this.confirm_freelancer_exists(user);
 

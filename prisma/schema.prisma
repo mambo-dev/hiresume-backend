@@ -71,6 +71,7 @@ model Freelancer {
   Skill_Freelancer      Skill_Freelancer[]
   freelancer_ratings    Ratings_Reviews[]
   freelancer_payment    Payment[]
+  freelancer_contract   Contract[]
 }
 
 model Ratings_Reviews {
@@ -90,6 +91,7 @@ model Bio {
   bio_title       String
   bio_description String
   bio_hourly_rate Int
+  bio_image_url   String
 }
 
 model Experience {
@@ -156,6 +158,7 @@ model Job {
   Freelancer            Freelancer?            @relation(fields: [freelancerId], references: [id], onDelete: Cascade)
   freelancerId          Int?
   Skill_Job             Skill_Job[]
+  job_contract          Contract[]
 }
 
 model Payment {
@@ -188,6 +191,21 @@ model Bid {
   Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id       Int?
   bid_approval_status Boolean
+}
+
+model Contract {
+  id                         Int         @id @default(autoincrement())
+  contract_job               Job?        @relation(fields: [contract_job_id], references: [id], onDelete: Cascade)
+  contract_job_id            Int
+  contract_freelancer        Freelancer? @relation(fields: [contract_freelancer_id], references: [id])
+  contract_freelancer_id     Int?
+  contract_details           String
+  contract_start             DateTime
+  contract_end               DateTime
+  contract_date_signed       DateTime
+  contract_freelancer_signed String?
+  contract_client_signed     String
+  contract_accepted          Boolean?
 }
 
 model Admin {
