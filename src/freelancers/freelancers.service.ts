@@ -20,6 +20,7 @@ import { DeleteAnyProfileDto } from "./dto/delete-any.dto";
 import { BidJobDto } from "./dto/bid-job.dto";
 import { createReadStream } from "fs";
 import { join } from "path";
+import { AmazonService } from "../amazon/amazon.service";
 
 export type SkillData = {
   skill_id: number;
@@ -29,7 +30,8 @@ export type SkillData = {
 export class FreelancersService {
   constructor(
     private usersService: UsersService,
-    private prismaService: PrismaService
+    private prismaService: PrismaService,
+    private amazonService: AmazonService
   ) {}
 
   async confirm_freelancer_exists(user: any) {
@@ -59,6 +61,10 @@ export class FreelancersService {
   ) {
     const { title, description, hourly_rate } = createBioDto;
     const freelancer = await this.confirm_freelancer_exists(user);
+
+    const imageFile = createReadStream(image.path);
+
+    this.amazonService.uploadFile(imageFile, "hiresumefiles", image.filename);
 
     return await this.prismaService.bio.create({
       data: {
@@ -190,7 +196,7 @@ export class FreelancersService {
     }
   }
 
-  async getFullProfile(user: any) {
+  async getFullProfile(user: any, res: any) {
     const freelancer = await this.confirm_freelancer_exists(user);
 
     const fullProfile = await this.prismaService.freelancer.findUnique({
@@ -205,17 +211,16 @@ export class FreelancersService {
       },
     });
 
-    const file = createReadStream(
-      join(
-        process.cwd(),
-        `uploads/freelancer/${fullProfile.freelancer_Bio.bio_image_url}`
-      )
+    const image_url = this.amazonService.getObjectUrl(
+      "hiresumefiles",
+      fullProfile.freelancer_Bio?.bio_image_url
     );
 
     return {
       ...fullProfile,
       freelancer_Bio: {
         ...fullProfile.freelancer_Bio,
+        bio_image_url: image_url,
       },
     };
   }

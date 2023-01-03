@@ -44,8 +44,14 @@ export class FreelancersController {
 
   @UseGuards(JwtAuthGuard)
   @Get("full-profile")
-  async getFullProfile(@Request() req) {
-    return this.freelancersService.getFullProfile(req.user);
+  async getFullProfile(
+    @Request() req,
+    @Res({
+      passthrough: true,
+    })
+    res: any
+  ) {
+    return this.freelancersService.getFullProfile(req.user, res);
   }
 
   @UseGuards(JwtAuthGuard)

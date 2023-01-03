@@ -8,6 +8,7 @@ import { ClientsService } from "src/clients/clients.service";
 import { JobsService } from "src/jobs/jobs.service";
 import { PaymentsService } from "src/payments/payments.service";
 import { EmailService } from "src/email/email.service";
+import { AmazonService } from "../amazon/amazon.service";
 
 @Module({
   controllers: [ReportsController],
@@ -20,6 +21,7 @@ import { EmailService } from "src/email/email.service";
     JobsService,
     PaymentsService,
     EmailService,
+    AmazonService,
   ],
 })
 export class ReportsModule {}
