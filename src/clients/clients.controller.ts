@@ -17,6 +17,7 @@ import { CreateJobDto } from "./dto/create-job.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
 import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
 import { PaymentDto } from "src/payments/dto/payment.dto";
+import { CreateContractDto, UpdateContractDto } from "./dto/contract.dto";
 
 @Controller("clients")
 export class ClientsController {
@@ -94,12 +95,40 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("update-completion-status/:job_id")
+  @Post("create-contract/:job_id")
   updateJobCompletionStatus(
     @Request() req,
     @Param("job_id", ParseIntPipe) job_id: number
   ) {
     return this.clientsService.updateJobCompletionStatus(req.user, job_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("update-contract/:contract_id")
+  updateContract(
+    @Request() req,
+    @Body() updateContractDto: UpdateContractDto,
+    @Param("contract_id", ParseIntPipe) contract_id: number
+  ) {
+    return this.clientsService.updateContract(
+      req.user,
+      updateContractDto,
+      contract_id
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("update-completion-status/:job_id")
+  createContract(
+    @Request() req,
+    @Body() createContractDto: CreateContractDto,
+    @Param("job_id", ParseIntPipe) job_id: number
+  ) {
+    return this.clientsService.createContract(
+      req.user,
+      createContractDto,
+      job_id
+    );
   }
 
   @UseGuards(JwtAuthGuard)

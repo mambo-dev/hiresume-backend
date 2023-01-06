@@ -215,4 +215,25 @@ export class FreelancersController {
   async getApprovedJobs(@Request() req) {
     return this.freelancersService.getApprovedJobs(req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("update-availability")
+  async updateAvailability(@Request() req) {
+    return this.freelancersService.updateAvailability(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("sign-contract/:contract_id")
+  async signContract(
+    @Request() req,
+    @Body() { contract_accepted, contract_denied_reason },
+    @Param("contract_id", ParseIntPipe) contract_id: number
+  ) {
+    return this.freelancersService.signContract(
+      req.user,
+      contract_id,
+      contract_accepted,
+      contract_denied_reason
+    );
+  }
 }

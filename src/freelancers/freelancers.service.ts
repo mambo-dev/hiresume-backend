@@ -82,14 +82,16 @@ export class FreelancersService {
   }
 
   async createExperience(user: any, createExperienceDto: CreateExperienceDto) {
-    const { company, year_from, year_to } = createExperienceDto;
+    const { company, year_from, year_to, tag, position } = createExperienceDto;
     const freelancer = await this.confirm_freelancer_exists(user);
 
     return await this.prismaService.experience.create({
       data: {
         experience_company: company,
-        experience_year_from: year_from,
-        experience_year_to: year_to,
+        experience_year_from: new Date(year_from),
+        experience_year_to: new Date(year_to),
+        experience_position: position,
+        experience_tag: tag,
         Freelancer: {
           connect: {
             id: freelancer.id,
@@ -153,8 +155,8 @@ export class FreelancersService {
     return await this.prismaService.education.create({
       data: {
         education_school: school,
-        education_year_from: year_from,
-        education_year_to: year_to,
+        education_year_from: new Date(year_from),
+        education_year_to: new Date(year_to),
         Freelancer: {
           connect: {
             id: freelancer.id,
@@ -205,9 +207,9 @@ export class FreelancersService {
       },
       include: {
         freelancer_experience: true,
-
         freelancer_education: true,
         freelancer_Bio: true,
+        freelancer_user: true,
       },
     });
 
@@ -438,5 +440,59 @@ export class FreelancersService {
         freelancerId: freelancer.id,
       },
     });
+  }
+
+  async updateAvailability(user: any) {
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    return await this.prismaService.freelancer.update({
+      where: {
+        id: freelancer.id,
+      },
+      data: {
+        freelancer_availability: freelancer.freelancer_availability
+          ? false
+          : true,
+      },
+    });
+  }
+
+  async signContract(
+    user: any,
+    contract_id: number,
+    contract_accepted: boolean,
+    contract_denied_reason?: boolean
+  ) {
+    const freelancer = await this.confirm_freelancer_exists(user);
+
+    if (!contract_accepted) {
+      return await this.prismaService.contract.update({
+        where: {
+          id: contract_id,
+        },
+        data: {
+          contract_accepted: false,
+          //@ts-ignore
+          contract_denied_reason,
+        },
+      });
+    }
+
+    const signContract = await this.prismaService.contract.update({
+      where: {
+        id: contract_id,
+      },
+      data: {
+        contract_accepted: true,
+        contract_freelancer_signed: user.username,
+        contract_freelancer: {
+          connect: {
+            id: freelancer.id,
+          },
+        },
+      },
+    });
+
+    return signContract;
   }
 }
