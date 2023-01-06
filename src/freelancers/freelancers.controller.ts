@@ -44,8 +44,14 @@ export class FreelancersController {
 
   @UseGuards(JwtAuthGuard)
   @Get("full-profile")
-  async getFullProfile(@Request() req) {
-    return this.freelancersService.getFullProfile(req.user);
+  async getFullProfile(
+    @Request() req,
+    @Res({
+      passthrough: true,
+    })
+    res: any
+  ) {
+    return this.freelancersService.getFullProfile(req.user, res);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -208,5 +214,26 @@ export class FreelancersController {
   @Get("approved-jobs")
   async getApprovedJobs(@Request() req) {
     return this.freelancersService.getApprovedJobs(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("update-availability")
+  async updateAvailability(@Request() req) {
+    return this.freelancersService.updateAvailability(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("sign-contract/:contract_id")
+  async signContract(
+    @Request() req,
+    @Body() { contract_accepted, contract_denied_reason },
+    @Param("contract_id", ParseIntPipe) contract_id: number
+  ) {
+    return this.freelancersService.signContract(
+      req.user,
+      contract_id,
+      contract_accepted,
+      contract_denied_reason
+    );
   }
 }

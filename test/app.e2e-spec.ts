@@ -20,6 +20,7 @@ import {
   TYPE,
   UpdateAllProfileDto,
 } from "../src/freelancers/dto/update-all.dto";
+import { join } from "path";
 
 describe("app-e2e", () => {
   let app: INestApplication;
@@ -502,6 +503,12 @@ describe("app-e2e", () => {
           .withHeaders({
             Authorization: "Bearer $S{freelancer_access_tk}",
           })
+          .withFile(
+            join(
+              process.cwd(),
+              "uploads/images/0f4b60ac-c9df-4f22-a701-18c8223494e4-design-3.png"
+            )
+          )
           .withBody(bioDto)
           .expectStatus(201)
           .stores("id_of_entity", "id");

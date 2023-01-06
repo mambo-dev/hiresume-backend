@@ -8,6 +8,7 @@ import { JobsService } from "src/jobs/jobs.service";
 import { PaymentDto } from "src/payments/dto/payment.dto";
 import { PaymentsService } from "src/payments/payments.service";
 import { PrismaService } from "src/prisma/prisma.service";
+import { CreateContractDto, UpdateContractDto } from "./dto/contract.dto";
 import { CreateJobDto } from "./dto/create-job.dto";
 import { RateReviewDto, UpdateRateReviewDto } from "./dto/rate-review.dto";
 import { UpdateJobDto } from "./dto/update-job.dto";
@@ -308,6 +309,82 @@ export class ClientsService {
     } catch (error) {
       throw new Error(error.message);
     }
+  }
+
+  async createContract(
+    user: any,
+    contractDto: CreateContractDto,
+    job_id: number
+  ) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+
+    const { details, client_signed, date_signed, end, start } = contractDto;
+
+    const findJob = await this.prismaService.job.findUnique({
+      where: {
+        id: job_id,
+      },
+    });
+
+    if (findJob.clientId !== client.id) {
+      throw new ForbiddenException("not allowed to access this resource");
+    }
+
+    if (!findJob) {
+      throw new NotFoundException("could not find job");
+    }
+
+    const contract = await this.prismaService.contract.create({
+      data: {
+        contract_client_signed: client_signed,
+        contract_date_signed: date_signed,
+        contract_details: details,
+        contract_end: end,
+        contract_start: start,
+        contract_job: {
+          connect: {
+            id: job_id,
+          },
+        },
+      },
+    });
+
+    return contract;
+  }
+
+  async updateContract(
+    user: any,
+    contractDto: UpdateContractDto,
+    contract_id: number
+  ) {
+    await this.confirmUserExistsAndIsClient(user.username);
+
+    const { details, client_signed, date_signed, end, start } = contractDto;
+
+    const findContract = await this.prismaService.contract.findUnique({
+      where: {
+        id: contract_id,
+      },
+    });
+
+    if (!findContract) {
+      throw new NotFoundException("could not find contract");
+    }
+
+    const contract = await this.prismaService.contract.update({
+      where: {
+        id: contract_id,
+      },
+      data: {
+        contract_client_signed: client_signed,
+        contract_date_signed: date_signed,
+        contract_details: details,
+        contract_end: end,
+        contract_start: start,
+      },
+    });
+
+    return contract;
   }
 
   //TODO: payment logic once frontend is done

@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { EmailService } from './email.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { EmailService } from "./email.service";
 
-describe('EmailService', () => {
+describe("EmailService", () => {
   let service: EmailService;
 
   beforeEach(async () => {
@@ -11,8 +11,16 @@ describe('EmailService', () => {
 
     service = module.get<EmailService>(EmailService);
   });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  jest.setTimeout(20000);
+  it("should send an email", () => {
+    expect(
+      service.sendEmail({
+        to: "mambo.michael.22@gmail.com",
+        from: "mambo.michael.22@gmail.com",
+        subject: "This is a test email",
+        text: "please work ",
+        html: "<div>test email</div>",
+      })
+    ).toBeTruthy();
   });
 });

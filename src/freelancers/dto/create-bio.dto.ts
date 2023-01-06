@@ -1,3 +1,4 @@
+import { Tag } from "@prisma/client";
 import { IsNotEmpty, MaxLength, MinLength } from "class-validator";
 import { SkillData } from "../freelancers.service";
 
@@ -24,6 +25,10 @@ export class CreateEducationDto {
 }
 
 export class CreateExperienceDto {
+  @IsNotEmpty()
+  tag: Tag;
+  @IsNotEmpty()
+  position: string;
   @IsNotEmpty()
   company: string;
   @IsNotEmpty()

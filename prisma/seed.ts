@@ -113,15 +113,17 @@ async function main() {
           freelancer_education: {
             create: {
               education_school: "St Pauls University",
-              education_year_from: "2019",
-              education_year_to: "2021",
+              education_year_from: new Date(2014),
+              education_year_to: new Date(2021),
             },
           },
           freelancer_experience: {
             create: {
+              experience_position: "Sneior engineer",
+              experience_tag: "full_time",
               experience_company: "Anglican Development Services",
-              experience_year_from: "2021",
-              experience_year_to: "2024",
+              experience_year_from: new Date(2021),
+              experience_year_to: new Date(2024),
             },
           },
           Skill_Freelancer: {

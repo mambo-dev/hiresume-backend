@@ -13,6 +13,7 @@ import { ExploresModule } from "./explores/explores.module";
 import { ReportsModule } from "./reports/reports.module";
 import { AdminsModule } from "./admins/admins.module";
 import { EmailModule } from "./email/email.module";
+import { AmazonModule } from './amazon/amazon.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EmailModule } from "./email/email.module";
     ReportsModule,
     AdminsModule,
     EmailModule,
+    AmazonModule,
   ],
   controllers: [AppController],
   providers: [AppService],

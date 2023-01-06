@@ -56,22 +56,22 @@ model Client {
 }
 
 model Freelancer {
-  id            Int    @id @default(autoincrement())
-  freelancer_id String @unique @default(uuid())
-
-  freelancer_experience Experience[]
-  freelancer_education  Education[]
-  freelancer_Bio        Bio?
-  freelancer_Bid        Bid[]
-  freelancer_user       User?                  @relation(fields: [freelancer_user_id], references: [id], onDelete: Cascade)
-  freelancer_user_id    Int?                   @unique
-  freelancer_files      String[]
-  Job_freelancer_table  Job_freelancer_table[]
-  Job                   Job[]
-  Skill_Freelancer      Skill_Freelancer[]
-  freelancer_ratings    Ratings_Reviews[]
-  freelancer_payment    Payment[]
-  freelancer_contract   Contract[]
+  id                      Int                    @id @default(autoincrement())
+  freelancer_id           String                 @unique @default(uuid())
+  freelancer_availability Boolean                @default(false)
+  freelancer_experience   Experience[]
+  freelancer_education    Education[]
+  freelancer_Bio          Bio?
+  freelancer_Bid          Bid[]
+  freelancer_user         User?                  @relation(fields: [freelancer_user_id], references: [id], onDelete: Cascade)
+  freelancer_user_id      Int?                   @unique
+  freelancer_files        String[]
+  Job_freelancer_table    Job_freelancer_table[]
+  Job                     Job[]
+  Skill_Freelancer        Skill_Freelancer[]
+  freelancer_ratings      Ratings_Reviews[]
+  freelancer_payment      Payment[]
+  freelancer_contract     Contract[]
 }
 
 model Ratings_Reviews {
@@ -99,8 +99,16 @@ model Experience {
   Freelancer           Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id        Int?
   experience_company   String
-  experience_year_from String
-  experience_year_to   String
+  experience_year_from DateTime
+  experience_year_to   DateTime
+  experience_position  String
+  experience_tag       Tag
+}
+
+enum Tag {
+  remote
+  full_time
+  part_time
 }
 
 model Education {
@@ -108,8 +116,8 @@ model Education {
   Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id       Int?
   education_school    String
-  education_year_from String
-  education_year_to   String
+  education_year_from DateTime
+  education_year_to   DateTime
 }
 
 model Skill {
@@ -206,6 +214,7 @@ model Contract {
   contract_freelancer_signed String?
   contract_client_signed     String
   contract_accepted          Boolean?
+  contract_denied_reason     String?
 }
 
 model Admin {
