@@ -217,13 +217,14 @@ export class FreelancersService {
       "hiresumefiles",
       fullProfile.freelancer_Bio?.bio_image_url
     );
-
+    const { user_password, ...result } = fullProfile.freelancer_user;
     return {
       ...fullProfile,
       freelancer_Bio: {
         ...fullProfile.freelancer_Bio,
         bio_image_url: image_url,
       },
+      freelancer_user: result,
     };
   }
 
