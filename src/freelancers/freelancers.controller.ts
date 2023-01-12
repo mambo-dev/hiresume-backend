@@ -164,8 +164,18 @@ export class FreelancersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete("delete-any")
-  async deleteFullProfile(@Body() deleteAnyProfile: DeleteAnyProfileDto) {
+  @Delete("delete-any/:type/:freelancer_id/:idOfEntity")
+  async deleteFullProfile(
+    @Param("type") type: string,
+    @Param("freelancer_id", ParseIntPipe) freelancer_id: number,
+    @Param("idOfEntity", ParseIntPipe) idOfEntity: number
+  ) {
+    let deleteAnyProfile: DeleteAnyProfileDto = {
+      //@ts-ignore
+      type: `${type}`,
+      freelancer_id,
+      idOfEntity,
+    };
     return this.freelancersService.deleteFullProfile(deleteAnyProfile);
   }
 
