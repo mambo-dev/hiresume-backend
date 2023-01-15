@@ -213,17 +213,37 @@ export class FreelancersService {
       },
     });
 
+    const freelancer_skills =
+      await this.prismaService.skill_Freelancer.findMany({
+        where: {
+          freelancer: {
+            id: fullProfile.id,
+          },
+        },
+        include: {
+          skill: true,
+        },
+      });
+
+    const returnSkill = freelancer_skills.map((skill) => {
+      return {
+        skill: { ...skill.skill },
+      };
+    });
+
     const image_url = this.amazonService.getObjectUrl(
       "hiresumefiles",
       fullProfile.freelancer_Bio?.bio_image_url
     );
-
+    const { user_password, ...result } = fullProfile.freelancer_user;
     return {
       ...fullProfile,
       freelancer_Bio: {
         ...fullProfile.freelancer_Bio,
         bio_image_url: image_url,
       },
+      freelancer_user: result,
+      returnSkill,
     };
   }
 
@@ -494,5 +514,21 @@ export class FreelancersService {
     });
 
     return signContract;
+  }
+
+  async getSkills(query: string) {
+    try {
+      const skills = await this.prismaService.skill.findMany({
+        where: {
+          skill_name: {
+            search: query,
+          },
+        },
+      });
+      console.log(skills);
+      return skills;
+    } catch (error) {
+      throw new BadRequestException("something went wrong");
+    }
   }
 }
