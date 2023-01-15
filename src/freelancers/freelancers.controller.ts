@@ -13,6 +13,7 @@ import {
 import {
   Delete,
   Param,
+  Query,
   Res,
   UploadedFile,
   UploadedFiles,
@@ -52,6 +53,11 @@ export class FreelancersController {
     res: any
   ) {
     return this.freelancersService.getFullProfile(req.user, res);
+  }
+
+  @Get("getSkills")
+  async getSkills(@Query("skill_name") skill_name: string) {
+    return this.freelancersService.getSkills(skill_name);
   }
 
   @UseGuards(JwtAuthGuard)
