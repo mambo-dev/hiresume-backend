@@ -43,6 +43,23 @@ export class ClientsService {
     });
   }
 
+  async getClientJobs(user: any) {
+    try {
+      const client = await this.confirmUserExistsAndIsClient(user.username);
+      const client_jobs = await this.prismaService.job.findMany({
+        where: {
+          Client: {
+            id: client.id,
+          },
+        },
+      });
+
+      return client_jobs;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async createJob(createJobDto: CreateJobDto, user: any) {
     try {
       const client = await this.confirmUserExistsAndIsClient(user.username);

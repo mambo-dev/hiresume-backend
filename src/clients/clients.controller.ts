@@ -30,6 +30,12 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get("client-jobs")
+  getClientJobs(@Request() req) {
+    return this.clientsService.getClientJobs(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Put("update-job/:id")
   updateJob(
     @Body() updateJobDto: UpdateJobDto,
