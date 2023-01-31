@@ -112,9 +112,9 @@ export class FreelancersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("skills")
-  async addSkills(@Request() req, @Body() addSkillsDto: AddSkillsDto) {
-    return this.freelancersService.addSkills(req.user, addSkillsDto);
+  @Post("add-or-attach-skill-freelancer/:skill_name")
+  addSkillsOrAttach(@Param("skill_name") skill_name: string, @Request() req) {
+    return this.freelancersService.addSkillsOrAttach(req.user, skill_name);
   }
 
   //updates any feature of a freelancers profile

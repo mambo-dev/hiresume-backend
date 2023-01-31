@@ -23,7 +23,7 @@ import { join } from "path";
 import { AmazonService } from "../amazon/amazon.service";
 
 export type SkillData = {
-  skill_id: number;
+  skill_name: string;
 };
 
 @Injectable()
@@ -44,6 +44,9 @@ export class FreelancersService {
     const freelancer = await this.prismaService.freelancer.findUnique({
       where: {
         freelancer_user_id: findUser.id,
+      },
+      include: {
+        freelancer_user: true,
       },
     });
 
@@ -166,29 +169,59 @@ export class FreelancersService {
     });
   }
 
-  async addSkills(user: any, addSkillsDto: AddSkillsDto) {
+  async addSkillsOrAttach(user: any, skill: string) {
     try {
-      const { skills } = addSkillsDto;
       const freelancer = await this.confirm_freelancer_exists(user);
 
-      const data = skills.map((skill) => {
-        return {
-          skill_id: skill.skill_id,
-          assignedBy: user.username,
-        };
+      const findSkill = await this.prismaService.skill.findUnique({
+        where: {
+          skill_name: skill,
+        },
       });
 
-      await this.prismaService.freelancer.update({
-        where: { id: freelancer.id },
-        data: {
-          Skill_Freelancer: {
-            createMany: {
-              data: data,
+      if (!findSkill) {
+        const createSkill = await this.prismaService.skill.create({
+          data: {
+            skill_name: skill,
+          },
+        });
+
+        await this.prismaService.freelancer.update({
+          where: {
+            id: freelancer.id,
+          },
+          data: {
+            Skill_Freelancer: {
+              create: {
+                skill: {
+                  connect: {
+                    id: createSkill.id,
+                  },
+                },
+                assignedBy: freelancer.freelancer_user.user_email,
+              },
             },
           },
+        });
+
+        return true;
+      }
+
+      await this.prismaService.freelancer.update({
+        where: {
+          id: freelancer.id,
         },
-        include: {
-          Skill_Freelancer: true,
+        data: {
+          Skill_Freelancer: {
+            create: {
+              skill: {
+                connect: {
+                  skill_name: skill,
+                },
+              },
+              assignedBy: freelancer.freelancer_user.user_email,
+            },
+          },
         },
       });
 
