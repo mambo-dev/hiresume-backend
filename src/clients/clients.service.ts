@@ -40,6 +40,9 @@ export class ClientsService {
       where: {
         client_user_id: user.id,
       },
+      include: {
+        client_user: true,
+      },
     });
   }
 
@@ -63,36 +66,82 @@ export class ClientsService {
   async createJob(createJobDto: CreateJobDto, user: any) {
     try {
       const client = await this.confirmUserExistsAndIsClient(user.username);
-      const { skills_required, ...job_details } = createJobDto;
-
-      const data = skills_required.map((skill) => {
-        return {
-          skill_id: skill.skill_id,
-          assignedBy: user.username,
-        };
-      });
 
       return await this.prismaService.job.create({
         data: {
-          ...job_details,
+          ...createJobDto,
           Client: {
             connect: {
               id: client.id,
             },
           },
-          Skill_Job: {
-            createMany: {
-              data: data,
-            },
-          },
-        },
-        include: {
-          Skill_Job: true,
         },
       });
     } catch (error) {
       console.log(error);
       throw new Error("could not create job");
+    }
+  }
+
+  async addOrAttachSkillToJob(user: any, skill: string) {
+    try {
+      const client = await this.confirmUserExistsAndIsClient(user);
+
+      const findSkill = await this.prismaService.skill.findUnique({
+        where: {
+          skill_name: skill,
+        },
+      });
+
+      if (!findSkill) {
+        const createSkill = await this.prismaService.skill.create({
+          data: {
+            skill_name: skill,
+          },
+        });
+
+        await this.prismaService.job.update({
+          where: {
+            id: client.id,
+          },
+          data: {
+            Skill_Job: {
+              create: {
+                skill: {
+                  connect: {
+                    id: createSkill.id,
+                  },
+                },
+                assignedBy: client.client_user.user_email,
+              },
+            },
+          },
+        });
+
+        return true;
+      }
+
+      await this.prismaService.freelancer.update({
+        where: {
+          id: client.id,
+        },
+        data: {
+          Skill_Freelancer: {
+            create: {
+              skill: {
+                connect: {
+                  skill_name: skill,
+                },
+              },
+              assignedBy: client.client_user.user_email,
+            },
+          },
+        },
+      });
+
+      return true;
+    } catch (error) {
+      throw new BadRequestException(`could not add skill ${error.message}`);
     }
   }
 
