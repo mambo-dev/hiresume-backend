@@ -58,62 +58,17 @@ export class ExploresService {
     const freelancer_logged_in =
       await this.freelancerService.confirm_freelancer_exists(user);
 
-    const freelancer_skills =
+    const find_freelancer_skills =
       await this.prismaService.skill_Freelancer.findMany({
         where: {
-          freelancer_id: freelancer_logged_in.id,
-        },
-        include: {
-          skill: true,
-        },
-      });
-
-    const findSuitableJobs = await this.prismaService.skill_Job.findMany({
-      take: 15,
-      include: {
-        skill: true,
-        job: true,
-      },
-    });
-
-    //look in array 1(jobs) skills and compare data in  array 2(freelancer)skills
-    //todo add a satisfactory index i.e has two or more skills in this array required by jobs
-    const recommended_jobs = [];
-    for (let i = 0; i <= findSuitableJobs.length - 1; i++) {
-      for (let j = 0; j <= freelancer_skills.length - 1; j++) {
-        if (findSuitableJobs[i].skill.id === freelancer_skills[j].skill.id) {
-          recommended_jobs.push(findSuitableJobs[i].job.id);
-        }
-      }
-    }
-
-    const removeDuplicates = (array: number[]) => {
-      let unique = [];
-      const sorted = array.sort((a, b) => {
-        return a - b;
-      });
-
-      for (let i = 0; i <= sorted.length - 1; i++) {
-        if (array[i] !== array[i + 1]) {
-          unique.push(array[i]);
-        }
-      }
-      return unique;
-    };
-
-    const return_jobs = removeDuplicates(recommended_jobs).map(async (id) => {
-      const job = await this.prismaService.job.findUnique({
-        where: {
-          id,
+          freelancer: {
+            id: freelancer_logged_in.id,
+          },
         },
       });
 
-      return { ...job };
-    });
-
-    const jobs_to_recommend = await Promise.all(return_jobs);
-
-    return jobs_to_recommend;
+    const find_jobs = await this.prismaService.job.findMany();
+    return find_jobs;
   }
 
   async getJob(job_id: number) {
@@ -144,6 +99,9 @@ export class ExploresService {
       take: 15,
       where: {
         job_title: {
+          search: query,
+        },
+        job_description: {
           search: query,
         },
       },
