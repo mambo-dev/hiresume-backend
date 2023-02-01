@@ -45,8 +45,8 @@ export class ExploresController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get("search-jobs/:query")
-  async searchJobs(@Param("query") query: string) {
+  @Get("search-jobs")
+  async searchJobs(@Query("query") query: string) {
     return this.exploresService.searchJobs(query);
   }
 

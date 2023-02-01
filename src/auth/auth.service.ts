@@ -25,7 +25,16 @@ export class AuthService {
   async login(user: any, res: Response) {
     const payload = { username: user.user_email, sub: user.user_id };
 
-    const findUser = await this.usersService.findOne(user.user_email);
+    const findUser = await this.prismaService.user.findUnique({
+      where: {
+        user_email: user.user_email,
+      },
+      include: {
+        Freelancer: true,
+        Client: true,
+        profile: true,
+      },
+    });
 
     const user_id = await this.prismaService.user.findUnique({
       where: {
@@ -34,6 +43,7 @@ export class AuthService {
       include: {
         Freelancer: true,
         Client: true,
+        profile: true,
       },
     });
     const access_token = this.jwtService.sign(payload);
