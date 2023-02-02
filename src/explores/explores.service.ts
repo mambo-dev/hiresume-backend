@@ -101,9 +101,6 @@ export class ExploresService {
         job_title: {
           search: query,
         },
-        job_description: {
-          search: query,
-        },
       },
     });
     return jobsFound;
