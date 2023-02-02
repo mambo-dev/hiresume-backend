@@ -92,9 +92,8 @@ export class ClientsService {
 
   async addOrAttachSkillToJob(user: any, job_id: number, skill: string) {
     try {
-      console.log(user);
       const client = await this.confirmUserExistsAndIsClient(user.username);
-      console.log(skill);
+
       const findSkill = await this.prismaService.skill.findUnique({
         where: {
           skill_name: skill,
@@ -107,6 +106,19 @@ export class ClientsService {
             skill_name: skill,
           },
         });
+
+        const isSkillInJob = await this.prismaService.skill_Job.findUnique({
+          where: {
+            skill_id_job_id: {
+              skill_id: createSkill.id,
+              job_id: job_id,
+            },
+          },
+        });
+
+        if (isSkillInJob) {
+          return true;
+        }
 
         await this.prismaService.job.update({
           where: {
@@ -129,12 +141,25 @@ export class ClientsService {
         return true;
       }
 
-      await this.prismaService.freelancer.update({
+      const isSkillInJob = await this.prismaService.skill_Job.findUnique({
+        where: {
+          skill_id_job_id: {
+            skill_id: findSkill.id,
+            job_id: job_id,
+          },
+        },
+      });
+
+      if (isSkillInJob) {
+        return true;
+      }
+
+      await this.prismaService.job.update({
         where: {
           id: job_id,
         },
         data: {
-          Skill_Freelancer: {
+          Skill_Job: {
             create: {
               skill: {
                 connect: {
