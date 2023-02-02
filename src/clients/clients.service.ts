@@ -66,10 +66,11 @@ export class ClientsService {
   async createJob(createJobDto: CreateJobDto, user: any) {
     try {
       const client = await this.confirmUserExistsAndIsClient(user.username);
+      const { skills, ...job_details } = createJobDto;
 
-      return await this.prismaService.job.create({
+      const job = await this.prismaService.job.create({
         data: {
-          ...createJobDto,
+          ...job_details,
           Client: {
             connect: {
               id: client.id,
@@ -77,16 +78,23 @@ export class ClientsService {
           },
         },
       });
+
+      skills.map(async (skill) => {
+        return await this.addOrAttachSkillToJob(user, job.id, skill);
+      });
+
+      return job;
     } catch (error) {
       console.log(error);
       throw new Error("could not create job");
     }
   }
 
-  async addOrAttachSkillToJob(user: any, skill: string) {
+  async addOrAttachSkillToJob(user: any, job_id: number, skill: string) {
     try {
-      const client = await this.confirmUserExistsAndIsClient(user);
-
+      console.log(user);
+      const client = await this.confirmUserExistsAndIsClient(user.username);
+      console.log(skill);
       const findSkill = await this.prismaService.skill.findUnique({
         where: {
           skill_name: skill,
@@ -102,7 +110,7 @@ export class ClientsService {
 
         await this.prismaService.job.update({
           where: {
-            id: client.id,
+            id: job_id,
           },
           data: {
             Skill_Job: {
@@ -123,7 +131,7 @@ export class ClientsService {
 
       await this.prismaService.freelancer.update({
         where: {
-          id: client.id,
+          id: job_id,
         },
         data: {
           Skill_Freelancer: {

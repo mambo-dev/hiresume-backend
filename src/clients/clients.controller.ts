@@ -30,12 +30,17 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("add-or-attach-skill/:skill_name")
+  @Get("add-or-attach-skill/:job_id/:skill_name")
   addOrAttachSkillToJob(
+    @Param("job_id", ParseIntPipe) job_id: number,
     @Param("skill_name") skill_name: string,
     @Request() req
   ) {
-    return this.clientsService.addOrAttachSkillToJob(req.user, skill_name);
+    return this.clientsService.addOrAttachSkillToJob(
+      req.user,
+      job_id,
+      skill_name
+    );
   }
 
   @UseGuards(JwtAuthGuard)
