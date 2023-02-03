@@ -77,8 +77,20 @@ export class ExploresService {
         where: {
           id: job_id,
         },
+        include: {
+          job_bid: true,
+          Skill_Job: true,
+        },
       });
-
+      const findSkills = await this.prismaService.skill.findMany({
+        where: {
+          Skill_Job: {
+            every: {
+              job_id: job.id,
+            },
+          },
+        },
+      });
       const bid_count = await this.prismaService.bid.aggregate({
         _count: {
           id: true,
@@ -87,6 +99,7 @@ export class ExploresService {
 
       return {
         ...job,
+        ...findSkills,
         total_bids: bid_count._count.id,
       };
     } catch (error) {
