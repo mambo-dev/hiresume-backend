@@ -169,7 +169,7 @@ export class FreelancersService {
     });
   }
 
-  async addSkillsOrAttach(user: any, skill: string) {
+  async addSkillsOrAttachToFreelancer(user: any, skill: string) {
     try {
       const freelancer = await this.confirm_freelancer_exists(user);
 
@@ -185,6 +185,20 @@ export class FreelancersService {
             skill_name: skill,
           },
         });
+
+        const isSkillInFreelancer =
+          await this.prismaService.skill_Freelancer.findUnique({
+            where: {
+              skill_id_freelancer_id: {
+                skill_id: createSkill.id,
+                freelancer_id: freelancer.id,
+              },
+            },
+          });
+
+        if (isSkillInFreelancer) {
+          return true;
+        }
 
         await this.prismaService.freelancer.update({
           where: {
@@ -207,6 +221,19 @@ export class FreelancersService {
         return true;
       }
 
+      const isSkillInFreelancer =
+        await this.prismaService.skill_Freelancer.findUnique({
+          where: {
+            skill_id_freelancer_id: {
+              skill_id: findSkill.id,
+              freelancer_id: freelancer.id,
+            },
+          },
+        });
+
+      if (isSkillInFreelancer) {
+        return true;
+      }
       await this.prismaService.freelancer.update({
         where: {
           id: freelancer.id,
@@ -558,7 +585,7 @@ export class FreelancersService {
           },
         },
       });
-      console.log(skills);
+
       return skills;
     } catch (error) {
       throw new BadRequestException("something went wrong");
