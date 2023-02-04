@@ -61,14 +61,61 @@ export class ExploresService {
     const find_freelancer_skills =
       await this.prismaService.skill_Freelancer.findMany({
         where: {
-          freelancer: {
-            id: freelancer_logged_in.id,
-          },
+          freelancer_id: freelancer_logged_in.id,
+        },
+        include: {
+          skill: true,
         },
       });
 
-    const find_jobs = await this.prismaService.job.findMany();
-    return find_jobs;
+    const skills = find_freelancer_skills.map((skills) => {
+      return {
+        id: skills.skill.id,
+        skill_name: skills.skill.skill_name,
+      };
+    });
+
+    const find_all_jobs = await this.prismaService.skill_Job.findMany({
+      include: {
+        job: true,
+        skill: true,
+      },
+    });
+
+    const jobs_skills = find_all_jobs.map((jobs) => {
+      return {
+        id: jobs.skill.id,
+        skill_name: jobs.skill.skill_name,
+        job_id: jobs.job.id,
+      };
+    });
+    let recommendedJobs = [];
+    for (let skill of skills) {
+      for (let job of jobs_skills) {
+        if (job.skill_name === skill.skill_name) {
+          recommendedJobs.push(job);
+        }
+      }
+    }
+    const removeDuplicates = (array: Array<any>) => {
+      const noDuplicates = array.filter(
+        (obj, index, self) =>
+          index === self.findIndex((t) => t.job_id === obj.job_id)
+      );
+      return noDuplicates;
+    };
+
+    const jobs = removeDuplicates(recommendedJobs).map(async (job) => {
+      const find_job = await this.prismaService.job.findUnique({
+        where: {
+          id: job.job_id,
+        },
+      });
+
+      return find_job;
+    });
+
+    return Promise.all(jobs);
   }
 
   async getJob(job_id: number) {
