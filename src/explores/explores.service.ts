@@ -142,6 +142,11 @@ export class ExploresService {
         _count: {
           id: true,
         },
+        where: {
+          Job: {
+            id: job_id,
+          },
+        },
       });
 
       return {

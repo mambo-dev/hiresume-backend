@@ -55,6 +55,9 @@ export class ClientsService {
             id: client.id,
           },
         },
+        include: {
+          job_bid: true,
+        },
       });
 
       return client_jobs;
@@ -234,6 +237,10 @@ export class ClientsService {
       throw new ForbiddenException(
         "cannot approve bids for jobs you did not create"
       );
+    }
+
+    if (findBid.bid_approval_status) {
+      throw new ForbiddenException("bid already approved");
     }
 
     const approved_bid = await this.prismaService.bid.update({

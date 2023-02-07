@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
+import { google } from "googleapis";
 
 const transport = nodemailer.createTransport({
   //@ts-ignore
@@ -28,7 +29,12 @@ type SendEmailMsg = {
 export class EmailService {
   async sendEmail(message: SendEmailMsg) {
     try {
-      await transport.sendMail(message);
+      // const url = jwt.generateAuthUrl({
+      //   redirect_uri: "http://localhost:3000",
+      //   scope: ["https://mail.google.com/"],
+      // });
+
+      //await transport.sendMail(message);
 
       return true;
     } catch (error) {
