@@ -66,7 +66,7 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("approve-bid/:bid_id")
+  @Get("approve-bid/:bid_id")
   approveBid(
     @Request() req,
 

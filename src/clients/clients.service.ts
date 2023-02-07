@@ -55,6 +55,9 @@ export class ClientsService {
             id: client.id,
           },
         },
+        include: {
+          job_bid: true,
+        },
       });
 
       return client_jobs;
