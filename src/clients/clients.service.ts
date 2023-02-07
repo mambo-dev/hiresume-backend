@@ -239,6 +239,10 @@ export class ClientsService {
       );
     }
 
+    if (findBid.bid_approval_status) {
+      throw new ForbiddenException("bid already approved");
+    }
+
     const approved_bid = await this.prismaService.bid.update({
       where: {
         id: bid_id,

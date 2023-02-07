@@ -2,14 +2,6 @@ import { Injectable } from "@nestjs/common";
 import * as nodemailer from "nodemailer";
 import { google } from "googleapis";
 
-const OAuth2 = google.auth.OAuth2;
-
-const jwt = new google.auth.OAuth2({
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  redirectUri: "http://localhost:3000",
-});
-
 const transport = nodemailer.createTransport({
   //@ts-ignore
   host: "smtp.gmail.com",
