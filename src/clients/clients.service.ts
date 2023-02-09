@@ -57,6 +57,7 @@ export class ClientsService {
         },
         include: {
           job_bid: true,
+          job_contract: true,
         },
       });
 
@@ -491,6 +492,31 @@ export class ClientsService {
     });
 
     return contract;
+  }
+
+  async getClientAcceptedBids(user: any, job_id: number) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+    const acceptedBids = await this.prismaService.bid.findMany({
+      where: {
+        bid_approval_status: true,
+        job_id,
+      },
+    });
+
+    return acceptedBids;
+  }
+
+  async getClientContracts(user: any) {
+    const client = await this.confirmUserExistsAndIsClient(user.username);
+    const contracts = await this.prismaService.contract.findMany({
+      where: {
+        contract_client: {
+          id: client.id,
+        },
+      },
+    });
+
+    return contracts;
   }
 
   //TODO: payment logic once frontend is done

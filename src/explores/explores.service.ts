@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { truncate } from "fs/promises";
 import { FreelancersService } from "src/freelancers/freelancers.service";
 import { PrismaService } from "src/prisma/prisma.service";
 import { FilterJobDto } from "./dto/filter-jobs.dto";
@@ -13,7 +14,9 @@ export class ExploresService {
   async findSampleJobs() {
     return await this.prismaService.job.findMany({
       take: 10,
-
+      where: {
+        job_open: true,
+      },
       include: {
         job_bid: false,
       },
@@ -110,6 +113,9 @@ export class ExploresService {
         where: {
           id: job.job_id,
         },
+        select: {
+          job_open: true,
+        },
       });
 
       return find_job;
@@ -166,6 +172,7 @@ export class ExploresService {
         job_title: {
           search: query,
         },
+        job_open: true,
       },
     });
     return jobsFound;
@@ -195,4 +202,16 @@ export class ExploresService {
       },
     });
   }
+
+  async getContract(contract_job_id: number) {
+    const contract = await this.prismaService.contract.findUnique({
+      where: {
+        contract_job_id,
+      },
+    });
+
+    return contract;
+  }
+
+ 
 }

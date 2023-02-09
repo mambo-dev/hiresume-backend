@@ -57,4 +57,12 @@ export class ExploresController {
   }
 
   //client side of explore
+  @UseGuards(JwtAuthGuard)
+  @Get("contract/:contract_job_id")
+  async getContract(
+    @Param("contract_job_id", ParseIntPipe) contract_job_id: number
+  ) {
+    console.log("this", contract_job_id);
+    return this.exploresService.getContract(contract_job_id);
+  }
 }

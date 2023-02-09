@@ -115,6 +115,21 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get("get-contracts")
+  getClientContracts(@Request() req) {
+    return this.clientsService.getClientContracts(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("get-accepted-bids/:job_id")
+  getClientAcceptedBids(
+    @Request() req,
+    @Param("job_id", ParseIntPipe) job_id: number
+  ) {
+    return this.clientsService.getClientAcceptedBids(req.user, job_id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post("create-contract/:job_id")
   updateJobCompletionStatus(
     @Request() req,
