@@ -53,6 +53,7 @@ model Client {
   client_company_name String?
   client_ratings      Ratings_Reviews[]
   client_payments     Payment[]
+  client_contracts    Contract[]
 }
 
 model Freelancer {
@@ -154,11 +155,13 @@ model Job {
   job_title             String
   job_description       String
   job_length            String
+  job_open              Boolean                @default(true)
   job_hourly_from       Int?
   job_hourly_to         Int?
   job_fixed_price       Int?
   job_level             String
   job_completion_status Boolean                @default(false)
+  job_has_contract      Boolean                @default(false)
   job_bid               Bid[]
   Client                Client?                @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId              Int?
@@ -166,7 +169,7 @@ model Job {
   Freelancer            Freelancer?            @relation(fields: [freelancerId], references: [id], onDelete: Cascade)
   freelancerId          Int?
   Skill_Job             Skill_Job[]
-  job_contract          Contract[]
+  job_contract          Contract?
 }
 
 model Payment {
@@ -199,14 +202,17 @@ model Bid {
   Freelancer          Freelancer? @relation(fields: [freelancer_id], references: [id], onDelete: Cascade)
   freelancer_id       Int?
   bid_approval_status Boolean
+  Contract            Contract?
 }
 
 model Contract {
   id                         Int         @id @default(autoincrement())
   contract_job               Job?        @relation(fields: [contract_job_id], references: [id], onDelete: Cascade)
-  contract_job_id            Int
+  contract_job_id            Int         @unique
   contract_freelancer        Freelancer? @relation(fields: [contract_freelancer_id], references: [id])
   contract_freelancer_id     Int?
+  contract_client            Client?     @relation(fields: [contract_client_id], references: [id], onDelete: Cascade)
+  contract_client_id         Int?
   contract_details           String
   contract_start             DateTime
   contract_end               DateTime
@@ -215,6 +221,9 @@ model Contract {
   contract_client_signed     String
   contract_accepted          Boolean?
   contract_denied_reason     String?
+  contract_amount_agreed_on  String?
+  contract_accepted_bid      Bid?        @relation(fields: [contract_accepted_bid_id], references: [id])
+  contract_accepted_bid_id   Int         @unique
 }
 
 model Admin {
