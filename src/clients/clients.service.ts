@@ -421,7 +421,8 @@ export class ClientsService {
   async createContract(
     user: any,
     contractDto: CreateContractDto,
-    job_id: number
+    job_id: number,
+    bid_id: number
   ) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
 
@@ -441,6 +442,16 @@ export class ClientsService {
       throw new NotFoundException("could not find job");
     }
 
+    const bid_has_contract = await this.prismaService.contract.findUnique({
+      where: {
+        contract_accepted_bid_id: bid_id,
+      },
+    });
+
+    if (bid_has_contract) {
+      throw new ForbiddenException("already created a contract");
+    }
+
     const contract = await this.prismaService.contract.create({
       data: {
         contract_client_signed: client_signed,
@@ -451,6 +462,16 @@ export class ClientsService {
         contract_job: {
           connect: {
             id: job_id,
+          },
+        },
+        contract_client: {
+          connect: {
+            id: client.id,
+          },
+        },
+        contract_accepted_bid: {
+          connect: {
+            id: bid_id,
           },
         },
       },
@@ -496,11 +517,38 @@ export class ClientsService {
 
   async getClientAcceptedBids(user: any, job_id: number) {
     const client = await this.confirmUserExistsAndIsClient(user.username);
-    const acceptedBids = await this.prismaService.bid.findMany({
+    const bids = await this.prismaService.bid.findMany({
       where: {
         bid_approval_status: true,
         job_id,
       },
+      include: {
+        Freelancer: {
+          include: {
+            freelancer_user: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+        Contract: true,
+        Job: true,
+      },
+    });
+
+    const acceptedBids = bids.map((bid) => {
+      const { Freelancer, Contract, Job, ...results } = bid;
+      const { freelancer_user, ...free_results } = Freelancer;
+      const { user_password, profile, ...user } = freelancer_user;
+      return {
+        bid: results,
+        freelancer: free_results,
+        contract: Contract,
+        user,
+        profile,
+        job: Job,
+      };
     });
 
     return acceptedBids;

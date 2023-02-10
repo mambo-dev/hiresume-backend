@@ -68,8 +68,7 @@ export class FreelancersService {
     const imageFile = createReadStream(image.path);
 
     this.amazonService.uploadFile(imageFile, "hiresumefiles", image.filename);
-
-    return await this.prismaService.bio.create({
+    const bio = await this.prismaService.bio.create({
       data: {
         bio_image_url: image.filename,
         bio_title: title,
@@ -82,6 +81,30 @@ export class FreelancersService {
         },
       },
     });
+    const image_url = this.amazonService.getObjectUrl(
+      "hiresumefiles",
+      bio.bio_image_url
+    );
+
+    const find_profile_by_user = await this.prismaService.user.findUnique({
+      where: {
+        id: freelancer.freelancer_user.id,
+      },
+      include: {
+        profile: true,
+      },
+    });
+
+    await this.prismaService.profile.update({
+      where: {
+        id: find_profile_by_user.profile.id,
+      },
+      data: {
+        profile_image: image_url,
+      },
+    });
+
+    return bio;
   }
 
   async createExperience(user: any, createExperienceDto: CreateExperienceDto) {
@@ -296,6 +319,26 @@ export class FreelancersService {
       fullProfile.freelancer_Bio?.bio_image_url
     );
     const { user_password, ...result } = fullProfile.freelancer_user;
+
+    const findProfile = await this.prismaService.profile.findFirst({
+      where: {
+        User: {
+          id: freelancer.id,
+        },
+      },
+    });
+
+    if (!findProfile.profile_image) {
+      await this.prismaService.profile.update({
+        where: {
+          id: findProfile.id,
+        },
+        data: {
+          profile_image: image_url,
+        },
+      });
+    }
+
     return {
       ...fullProfile,
       freelancer_Bio: {

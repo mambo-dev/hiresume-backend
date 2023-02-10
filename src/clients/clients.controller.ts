@@ -130,7 +130,7 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("create-contract/:job_id")
+  @Post("update-job-completion-contract/:job_id")
   updateJobCompletionStatus(
     @Request() req,
     @Param("job_id", ParseIntPipe) job_id: number
@@ -153,16 +153,18 @@ export class ClientsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post("update-completion-status/:job_id")
+  @Post("create-contract/:job_id/:bid_id")
   createContract(
     @Request() req,
     @Body() createContractDto: CreateContractDto,
-    @Param("job_id", ParseIntPipe) job_id: number
+    @Param("job_id", ParseIntPipe) job_id: number,
+    @Param("bid_id", ParseIntPipe) bid_id: number
   ) {
     return this.clientsService.createContract(
       req.user,
       createContractDto,
-      job_id
+      job_id,
+      bid_id
     );
   }
 

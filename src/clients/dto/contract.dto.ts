@@ -5,9 +5,6 @@ export class CreateContractDto {
   @IsNotEmpty({
     message: "cannot have empty details",
   })
-  @MaxLength(1000, {
-    message: "cannot exceed  1000 words",
-  })
   @MinLength(100, {
     message: "contract details should be more than 100 words",
   })
