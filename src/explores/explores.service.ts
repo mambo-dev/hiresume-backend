@@ -113,15 +113,16 @@ export class ExploresService {
         where: {
           id: job.job_id,
         },
-        select: {
-          job_open: true,
-        },
       });
 
       return find_job;
     });
 
-    return Promise.all(jobs);
+    const open_jobs = await Promise.all(jobs);
+
+    return open_jobs.filter((jobs) => {
+      return jobs.job_open;
+    });
   }
 
   async getJob(job_id: number) {
@@ -212,6 +213,4 @@ export class ExploresService {
 
     return contract;
   }
-
- 
 }
